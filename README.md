@@ -1,4 +1,4 @@
-# Copiloto de apoyo al triage de urgencias (prototipo RAG offline)
+# TDSE · Copiloto de Triage RAG
 
 Prototipo funcional de los **componentes 2 y 3 (versión mínima)** de un copiloto de
 apoyo al triage de urgencias basado en generación aumentada por recuperación (RAG):
@@ -18,6 +18,83 @@ citación obligatoria, una línea base de reglas, un registro de auditoría, y l
 métricas formales (tasa de sub-triage ponderada, kappa ponderado, recall@k,
 fidelidad de citación) necesarias para evaluar las cuatro celdas del diseño 2x2
 más la línea base.
+
+## Arquitectura
+
+El prototipo sigue una arquitectura de **pipeline en capas**, con una separación
+estricta entre recuperación (evidencia) y generación (sugerencia), y un registro
+de auditoría transversal a ambas. No hay una capa de servicio/API: la evaluación
+de este semestre es un pipeline offline por lotes, no un servicio desplegado (ver
+"Limitaciones" más abajo).
+
+```mermaid
+flowchart LR
+    subgraph Entrada
+        R["Relato libre del paciente"]
+    end
+
+    subgraph Comp2["Componente 2 · Ingesta y recuperación (src/ingest.py, retrieval.py)"]
+        C[("corpus/raw/ o\ncorpus/reformatted/")] --> ING["ingest.py\nfragmentos citables"]
+        ING --> RET["retrieval.py\nTF-IDF: generic | clinical_es"]
+    end
+
+    subgraph Comp3["Componente 3 mínimo · Generación (src/generator.py)"]
+        GEN["generator.py\nvecino más cercano +\nmargen de confianza"]
+    end
+
+    subgraph C0["Línea base C0 (src/baseline.py)"]
+        BASE["baseline.py\nárbol de reglas congelado\n(data/keyword_rules.json)"]
+    end
+
+    R --> RET
+    RET --> GEN
+    R --> BASE
+
+    GEN -->|"nivel + cita, o abstención"| AUD["audit.py\nregistro JSONL"]
+    AUD --> HUM["Interfaz mínima de revisión\n(demo.py / componente 4, futuro)"]
+
+    GEN -.-> MET["metrics.py\nS, kappa, recall@k, fidelidad"]
+    BASE -.-> MET
+```
+
+**Flujo de datos (`src/pipeline.py` orquesta los tres primeros pasos):**
+
+1. **Ingesta (`ingest.py`)** parsea `corpus/raw/` o `corpus/reformatted/` en
+   `Chunk`s, cada uno con un id de cita y, cuando aplica, un único nivel de
+   triage asociado. El formato crudo usa expresiones regulares frágiles a
+   propósito (simula un extractor genérico de PDF/tabla); el reformateado usa
+   encabezados `[CITA: ...]` limpios. Esta es la manifestación concreta de la
+   brecha G3 del documento del proyecto (guías con *layout* complejo).
+2. **Recuperación (`retrieval.py`)** indexa esos fragmentos con TF-IDF propio
+   (sin dependencias externas) y expone `retrieve(texto, k)`. El modo
+   `clinical_es` aplica un léxico de normalización coloquial→clínico antes de
+   vectorizar, como sustituto determinista de un modelo de embeddings de
+   dominio (Factor B del diseño 2x2).
+3. **Generación (`generator.py`)** toma los fragmentos recuperados y aplica una
+   regla de vecino-más-cercano con margen de confianza: sugiere el nivel del
+   fragmento más similar, o se abstiene si la evidencia es insuficiente o
+   contradictoria. Nunca emite un nivel sin una cita que lo respalde.
+4. **Auditoría (`audit.py`)** registra, para cada caso, el relato de entrada,
+   los fragmentos recuperados con su score, la versión de corpus/embeddings, y
+   la sugerencia (incluida la abstención), en JSON Lines — la base para que un
+   humano pueda revisar y para que `metrics.py` pueda evaluar.
+5. La **línea base C0 (`baseline.py`)** es una ruta independiente y paralela:
+   un árbol de reglas por palabras clave (`data/keyword_rules.json`, congelado
+   antes de evaluar) que recibe el mismo relato de texto libre, sin pasar por
+   recuperación ni por el componente 3.
+6. **`experiments/run_experiment.py`** ejecuta las cuatro celdas del diseño 2x2
+   (E1-E4) más C0 sobre `data/cases.json` y calcula las métricas formales de
+   `metrics.py` (Sección "Métricas" abajo).
+
+Esta arquitectura corresponde a una versión mínima y ejecutable de la "vista
+arquitectónica preliminar" del documento del proyecto (componentes 1-4:
+extracción del relato, recuperación, generación con citación, y revisión
+humana): aquí los componentes 2 y 3 están implementados en versión mínima:
+`demo.py` funciona como una interfaz de inspección manual muy básica del
+componente 4 (revisión humana), no como la interfaz de producción descrita
+conceptualmente en el documento. La integración con historia clínica (FHIR),
+la multi-tenencia y el despliegue como servicio quedan fuera de esta
+arquitectura de prototipo (ver "Limitaciones").
 
 ## Aviso importante
 
@@ -43,9 +120,10 @@ reproducible sin acceso a internet ni a paquetes de terceros.
 
 ```bash
 git clone <url-del-repositorio>
-cd triage-copiloto-rag
+cd TDSE_Copiloto_de_Triage_RAG
 python -m unittest discover -s tests -v   # correr las pruebas
 python -m experiments.run_experiment      # correr el diseño 2x2 + linea base
+python -m experiments.analyze_external_data  # analizar el dataset real (ver abajo)
 python demo.py "el paciente tiene dolor en el pecho y sudoracion fria"
 ```
 
@@ -58,6 +136,7 @@ corpus/
 data/
   cases.json      34 viñetas sintéticas con gold standard intra-equipo
   keyword_rules.json  Línea base de reglas (C0), congelada antes de evaluar
+  external_triage_urgencias_colombia.csv  Dataset real de Datos Abiertos Colombia (ver abajo)
 src/
   ingest.py       Parseo de ambos formatos de corpus a fragmentos citables
   retrieval.py    Recuperación TF-IDF, modos 'generic' y 'clinical_es'
@@ -67,14 +146,74 @@ src/
   audit.py        Registro de auditoría (JSON Lines)
   pipeline.py     Orquesta un caso: recuperación -> generación -> auditoría
 experiments/
-  run_experiment.py  Ejecuta las celdas E1-E4 + C0 sobre data/cases.json
+  run_experiment.py        Ejecuta las celdas E1-E4 + C0 sobre data/cases.json
+  analyze_external_data.py Analiza el dataset real (distribución de niveles y tiempos)
 results/
-  summary.md        Resultados en Markdown (generado por run_experiment.py)
-  raw_results.json  Resultados en JSON (generado por run_experiment.py)
-  audit_*.jsonl     Registro de auditoría por celda (generado por run_experiment.py)
+  summary.md                  Resultados en Markdown (generado por run_experiment.py)
+  raw_results.json            Resultados en JSON (generado por run_experiment.py)
+  audit_*.jsonl                Registro de auditoría por celda (generado por run_experiment.py)
+  external_data_summary.md    Análisis del dataset real (generado por analyze_external_data.py)
 tests/            Pruebas unitarias de cada módulo
 demo.py           CLI de una sola consulta, para inspección manual
 ```
+
+## Fuentes de datos reales
+
+Se buscaron activamente bases de datos reales que pudieran mejorar el
+prototipo. El hallazgo central: **no existen historias clínicas reales de
+triage con relato libre del paciente y de acceso abierto sin restricciones**
+(por buenas razones de protección de datos de salud); lo que sí existe, y se
+documenta aquí con honestidad sobre qué puede y qué no puede hacer cada
+fuente:
+
+### Integrado en este repositorio
+
+- **[Clasificación en Triage Urgencias](https://www.datos.gov.co/Salud-y-Protecci-n-Social/Clasificaci-n-en-Triage-Urgencias/vt5n-eu2r)**
+  (Datos Abiertos Colombia, dataset `vt5n-eu2r`, ~89.000 registros, acceso
+  público sin credenciales vía API Socrata). Es un dataset **administrativo**:
+  trae nivel de triage (I-V) y marcas de tiempo de ingreso/atención de una red
+  de IPS, **no** el relato del paciente. Se descargó completo a
+  `data/external_triage_urgencias_colombia.csv` y se analiza con
+  `experiments/analyze_external_data.py` (resultado real en
+  `results/external_data_summary.md`). Sirve para dos cosas que el documento
+  del proyecto dejó como supuestos no verificados:
+  - Confirma empíricamente que los niveles I-II son una fracción muy pequeña
+    de los casos reales (~3.3% en este dataset), lo que justifica con datos —
+    no solo con intuición — la decisión de sobremuestrearlos en
+    `data/cases.json`.
+  - Da una referencia real (aunque secundaria e ilustrativa) de tiempos de
+    ingreso a atención por nivel, en lugar de las cifras puramente
+    hipotéticas que el documento del proyecto declaraba explícitamente como
+    no medidas.
+
+### Relevantes para una fase posterior (no integradas)
+
+- **[MIMIC-IV-ED Demo](https://physionet.org/content/mimic-iv-ed-demo/2.2/)**
+  (PhysioNet, 100 pacientes, acceso abierto sin credenciales): sí incluye
+  motivo de consulta en texto libre, nivel ESI (1-5) y signos vitales — la
+  estructura más parecida a lo que necesita el clasificador de texto del
+  copiloto — pero está en **inglés** y de un hospital de EE. UU., por lo que
+  no es sustituto de datos en español sin una traducción/adaptación cuidadosa
+  (y sería una forma razonable de probar si la arquitectura generaliza a otro
+  idioma). El dataset completo (~425.000 estancias) existe en PhysioNet pero
+  requiere registro, entrenamiento en sujetos humanos y firma de un acuerdo de
+  uso de datos (DUA).
+- **[ClinText-SP](https://arxiv.org/pdf/2503.18594)** y
+  **CoWeSe (Corpus Web Salud Español)**: corpus abiertos de texto clínico y
+  biomédico en español (26M y ~750M tokens respectivamente), no específicos de
+  triage. Son la ruta natural para entrenar un modelo real de embeddings
+  clínicos en español y así reemplazar el léxico de normalización de
+  `retrieval.py` (modo `clinical_es`) por un modelo real, cerrando la brecha
+  G1 del documento del proyecto.
+- **[CARMEN-I](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12215073/)**:
+  2.000 documentos clínicos anonimizados del Hospital Clínic de Barcelona en
+  español/catalán (informes de alta, interconsultas, radiología). Útil para
+  NER/anonimización, no para triage específicamente.
+
+Ninguna de estas fuentes internacionales sustituye la necesidad, señalada en
+el documento del proyecto, de una validación clínica externa con
+profesionales de salud colombianos sobre el dominio y la normativa
+específicos de este prototipo.
 
 ## Diseño experimental (resumen)
 
@@ -153,6 +292,11 @@ levemente si se edita `data/cases.json` o los umbrales de `src/generator.py`):
   restricciones del entorno de ejecución (sin acceso garantizado a internet).
 - La evaluación es 100% offline y por lotes; no mide latencia bajo
   concurrencia ni incluye un despliegue en producción.
+- El dataset externo real (`data/external_triage_urgencias_colombia.csv`) es
+  administrativo y de una sola red de IPS reportante: no contiene relato de
+  paciente, no es necesariamente representativo de todo el país, y no se usa
+  para entrenar ni evaluar el clasificador de texto (ver "Fuentes de datos
+  reales").
 
 ## Extensión a un despliegue real
 
@@ -168,6 +312,10 @@ pipeline:
 - Ampliar `data/cases.json` a 60-100 casos con doble ciego real por
   evaluadores clínicos externos, siguiendo el esquema ya definido en cada
   registro (`evaluator1`, `evaluator2`, `resolution_method`, etc.).
+- Entrenar un modelo real de embeddings clínicos en español sobre corpus como
+  ClinText-SP o CoWeSe (ver "Fuentes de datos reales"), y validar la
+  generalización de la arquitectura con MIMIC-IV-ED (en inglés) antes de
+  intentarlo en español.
 
 ## Licencia
 
