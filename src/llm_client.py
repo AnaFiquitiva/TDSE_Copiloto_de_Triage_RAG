@@ -75,11 +75,21 @@ def _post_json(url: str, payload: dict) -> dict:
     raise last_error or LLMUnavailableError("Fallo desconocido llamando a Gemini")
 
 
-def embed_text(text: str, api_key: str | None = None) -> list[float]:
-    """Obtiene el vector de embedding real de Gemini para `text`."""
+def embed_text(text: str, api_key: str | None = None, task_type: str | None = None) -> list[float]:
+    """Obtiene el vector de embedding real de Gemini para `text`.
+
+    `task_type` activa la codificación asimétrica de `gemini-embedding-001`:
+    un mismo texto produce un vector distinto según si se declara como
+    "RETRIEVAL_DOCUMENT" (fragmentos del corpus) o "RETRIEVAL_QUERY" (el
+    relato del paciente). Usar el `task_type` correcto en cada lado mejora
+    la calidad de la recuperación frente a no declarar ninguno (equivalente
+    a "RETRIEVAL_QUERY" para ambos lados); ver `GeminiRetriever`.
+    """
     api_key = api_key or get_api_key()
     url = f"{API_BASE}/{EMBEDDING_MODEL}:embedContent?key={api_key}"
-    payload = {"content": {"parts": [{"text": text}]}}
+    payload: dict = {"content": {"parts": [{"text": text}]}}
+    if task_type:
+        payload["taskType"] = task_type
     try:
         response = _post_json(url, payload)
         return response["embedding"]["values"]

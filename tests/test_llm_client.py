@@ -46,6 +46,31 @@ class TestEmbedText(unittest.TestCase):
             with self.assertRaises(llm_client.LLMUnavailableError):
                 llm_client.embed_text("texto", api_key="fake-key")
 
+    def test_task_type_is_sent_in_request_payload(self):
+        """GeminiRetriever depende de que task_type efectivamente viaje en el
+        payload para lograr la codificación asimétrica consulta/documento."""
+        fake_payload = {"embedding": {"values": [0.1]}}
+        captured = {}
+
+        def fake_urlopen(request, timeout=None):
+            captured["body"] = json.loads(request.data.decode("utf-8"))
+            return _FakeResponse(fake_payload)
+
+        with patch("urllib.request.urlopen", side_effect=fake_urlopen):
+            llm_client.embed_text("texto", api_key="fake-key", task_type="RETRIEVAL_DOCUMENT")
+        self.assertEqual(captured["body"].get("taskType"), "RETRIEVAL_DOCUMENT")
+
+    def test_no_task_type_omits_field_from_payload(self):
+        captured = {}
+
+        def fake_urlopen(request, timeout=None):
+            captured["body"] = json.loads(request.data.decode("utf-8"))
+            return _FakeResponse({"embedding": {"values": [0.1]}})
+
+        with patch("urllib.request.urlopen", side_effect=fake_urlopen):
+            llm_client.embed_text("texto", api_key="fake-key")
+        self.assertNotIn("taskType", captured["body"])
+
 
 class TestGenerateStructured(unittest.TestCase):
     def test_parses_json_from_candidate_text(self):

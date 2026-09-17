@@ -249,9 +249,16 @@ de la variable sin ningún valor real.
 ### Qué cambia exactamente con este backend
 
 - **Recuperación:** `GeminiRetriever` (`src/retrieval.py`) reemplaza el
-  TF-IDF por el modelo `gemini-embedding-001`. Los embeddings del corpus se
-  cachean en `data/.gemini_embedding_cache.json` (excluido de git) para no
-  volver a pagar esa llamada en cada ejecución.
+  TF-IDF por el modelo `gemini-embedding-001`, usando la codificación
+  **asimétrica** de la API: el corpus se embebe con
+  `task_type="RETRIEVAL_DOCUMENT"` y el relato del paciente con
+  `task_type="RETRIEVAL_QUERY"` (para el mismo texto, ambos vectores tienen
+  una similitud coseno de solo ~0.84, es decir, son realmente distintos).
+  Usar el `task_type` correcto en cada lado, en vez del comportamiento por
+  defecto de la API, es lo que más mejoró la calidad de la recuperación en la
+  comparación de abajo. Los embeddings del corpus se cachean en
+  `data/.gemini_embedding_cache.json` (excluido de git) para no volver a
+  pagar esa llamada en cada ejecución.
 - **Generación:** `LLMBackedGenerator` (`src/llm_generator.py`) reemplaza la
   regla de vecino-más-cercano por una llamada a `gemini-flash-lite-latest`
   con salida JSON forzada a un esquema fijo (`citation`, `abstain`,
@@ -281,20 +288,21 @@ python -m experiments.compare_backends
 
 | Métrica | Determinista | Gemini |
 |---|---|---|
-| Cobertura (no abstención) | 0.48 | 0.90 |
+| Cobertura (no abstención) | 0.48 | 0.97 |
 | S (sub-triage ponderado) | 0.357 | 0.000 |
-| Sensibilidad I-II | 0.357 | 0.929 |
-| Recall@k | 0.552 | 0.862 |
-| Tasa de abstención indebida | 0.517 | 0.103 |
+| Sensibilidad I-II | 0.357 | 1.000 |
+| Recall@k | 0.552 | 0.966 |
+| Tasa de abstención indebida | 0.517 | 0.034 |
 
 Con solo 34 casos esto es ilustrativo, no una conclusión estadística — pero
 la dirección del resultado es consistente con lo esperado: los embeddings
-reales de Gemini generalizan mejor que TF-IDF ante frases que no comparten
-vocabulario literal con el corpus, y la comprensión de lenguaje natural del
-LLM resuelve mejor los casos ambiguos que la regla de vecino-más-cercano
-(incluyendo abstenerse correctamente en relatos genuinamente insuficientes,
-como los casos C031-C034). El costo es depender de una API externa: latencia
-de red, un costo por llamada, y la necesidad de manejar la key con cuidado.
+reales de Gemini (con codificación asimétrica consulta/documento) generalizan
+mucho mejor que TF-IDF ante frases que no comparten vocabulario literal con
+el corpus, y la comprensión de lenguaje natural del LLM resuelve mejor los
+casos ambiguos que la regla de vecino-más-cercano (incluyendo abstenerse
+correctamente en relatos genuinamente insuficientes, como los casos
+C031-C034). El costo es depender de una API externa: latencia de red, un
+costo por llamada, y la necesidad de manejar la key con cuidado.
 
 ## Estructura del repositorio
 

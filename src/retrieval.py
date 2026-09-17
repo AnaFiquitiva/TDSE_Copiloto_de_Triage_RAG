@@ -169,11 +169,21 @@ class GeminiRetriever:
     (`gemini-embedding-001`), en vez de TF-IDF. Backend opcional: requiere
     `GEMINI_API_KEY` (ver README.md, sección "Backend LLM opcional").
 
+    Usa la codificación **asimétrica** que ofrece `gemini-embedding-001`: los
+    fragmentos del corpus se embeben con `task_type="RETRIEVAL_DOCUMENT"` y el
+    relato del paciente con `task_type="RETRIEVAL_QUERY"`. Estos dos vectores
+    para el mismo texto NO son iguales (la similitud coseno entre ambos es de
+    apenas ~0.84 en la práctica): usar el `task_type` correcto en cada lado,
+    en vez del comportamiento por defecto de la API (equivalente a tratar
+    todo como consulta), es lo que la propia documentación de Gemini
+    recomienda para tareas de recuperación y mejora la calidad del ranking.
+
     Los embeddings de los fragmentos del corpus se cachean en disco
     (`cache_path`, por defecto `data/.gemini_embedding_cache.json`, excluido
     de git) para no volver a llamar a la API por cada corrida: la key de
-    caché es un hash del texto exacto del fragmento, así que un cambio en el
-    corpus invalida automáticamente solo las entradas afectadas.
+    caché combina el `task_type` y un hash del texto exacto del fragmento,
+    así que un cambio en el corpus invalida automáticamente solo las
+    entradas afectadas.
 
     Implementa la misma interfaz que `Retriever` (`.retrieve(query, k)`) para
     que `MinimalGenerator`/`LLMBackedGenerator` puedan usar cualquiera de los
@@ -190,7 +200,9 @@ class GeminiRetriever:
         self.cache_path = cache_path
         self._embed_fn = embed_fn
         self._cache = self._load_cache()
-        self._doc_vectors = [self._embed_cached(c.text) for c in chunks]
+        self._doc_vectors = [
+            self._embed_cached(c.text, "RETRIEVAL_DOCUMENT") for c in chunks
+        ]
 
     def _load_cache(self) -> dict[str, list[float]]:
         if self.cache_path.exists():
@@ -201,15 +213,15 @@ class GeminiRetriever:
         self.cache_path.parent.mkdir(parents=True, exist_ok=True)
         self.cache_path.write_text(json.dumps(self._cache), encoding="utf-8")
 
-    def _embed_cached(self, text: str) -> list[float]:
-        key = _text_hash(text)
+    def _embed_cached(self, text: str, task_type: str) -> list[float]:
+        key = f"{task_type}:{_text_hash(text)}"
         if key not in self._cache:
-            self._cache[key] = self._embed_fn(text)
+            self._cache[key] = self._embed_fn(text, task_type=task_type)
             self._save_cache()
         return self._cache[key]
 
     def retrieve(self, query: str, k: int = 5) -> list[RankedChunk]:
-        query_vec = self._embed_fn(query)
+        query_vec = self._embed_fn(query, task_type="RETRIEVAL_QUERY")
         scored = [
             RankedChunk(chunk=chunk, score=_cosine_similarity(query_vec, doc_vec))
             for chunk, doc_vec in zip(self.chunks, self._doc_vectors)

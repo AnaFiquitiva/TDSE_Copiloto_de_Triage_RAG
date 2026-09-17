@@ -10,9 +10,11 @@ from src.ingest import Chunk
 from src.retrieval import GeminiRetriever
 
 
-def _fake_embed(text: str) -> list[float]:
+def _fake_embed(text: str, task_type: str | None = None) -> list[float]:
     """Embedding determinista y falso: vector one-hot según la primera
-    palabra del texto, suficiente para probar el ranking por similitud."""
+    palabra del texto, suficiente para probar el ranking por similitud.
+    Ignora `task_type` (a diferencia del real, ver test_llm_client.py para
+    la prueba de que sí se envía a la API)."""
     vocab = ["dolor", "fiebre", "certificado", "otro"]
     first_word = text.strip().split()[0].lower() if text.strip() else "otro"
     return [1.0 if first_word == v else 0.0 for v in vocab] or [0.0] * len(vocab)
@@ -38,9 +40,9 @@ class TestGeminiRetriever(unittest.TestCase):
             cache_path = Path(tmp) / "cache.json"
             call_count = {"n": 0}
 
-            def counting_embed(text):
+            def counting_embed(text, task_type=None):
                 call_count["n"] += 1
-                return _fake_embed(text)
+                return _fake_embed(text, task_type=task_type)
 
             GeminiRetriever(self.chunks, cache_path=cache_path, embed_fn=counting_embed)
             self.assertEqual(call_count["n"], 3)  # una llamada por chunk del corpus

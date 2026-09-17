@@ -15,15 +15,14 @@
   "gemini": {
     "backend_solicitado": "gemini",
     "backend_realmente_usado": {
-      "gemini": 33,
-      "gemini_fallback_deterministic": 1
+      "gemini": 34
     },
     "n_eligible_cases": 29,
-    "cobertura": 0.896551724137931,
+    "cobertura": 0.9655172413793104,
     "S_sub_triage": 0.0,
-    "sensibilidad_I_II": 0.9285714285714286,
-    "recall_at_k": 0.8620689655172413,
+    "sensibilidad_I_II": 1.0,
+    "recall_at_k": 0.9655172413793104,
     "tasa_abstencion_correcta": 1.0,
-    "tasa_abstencion_indebida": 0.10344827586206896
+    "tasa_abstencion_indebida": 0.034482758620689655
   }
 }
