@@ -154,12 +154,15 @@ servicios pagos, evaluado offline) y no a preferencia arbitraria:
   triage y de señales de alarma usada en el sistema colombiano y en escalas
   internacionales comparables. **No es una transcripción literal ni oficial**
   de la Resolución 5596 de 2015 ni de ninguna guía clínica institucional.
-- El conjunto de 48 viñetas de `data/cases.json` es sintético y fue etiquetado
-  por el propio equipo (sin evaluadores clínicos externos). Es una versión
-  reducida e ilustrativa del protocolo de 60-100 casos con doble ciego descrito
-  en el documento del proyecto: sirve para ejercitar el pipeline y la
-  maquinaria de métricas de extremo a extremo, **no** para sostener una
-  afirmación de seguridad clínica real.
+- El conjunto de 74 viñetas de `data/cases.json` es sintético y fue etiquetado
+  por el propio equipo (sin evaluadores clínicos externos), con doble ciego
+  intra-equipo y niveles I-II sobremuestreados (18 y 15 casos respectivamente,
+  ambos por encima del mínimo de 15 exigido en el documento del proyecto,
+  Sección 5). Ya cumple el **rango de 60-100 casos** que pide el protocolo
+  original — lo que sigue faltando, y es la brecha real, es que el doble
+  ciego lo hizo el propio equipo y no evaluadores clínicos externos: sirve
+  para ejercitar el pipeline y la maquinaria de métricas de extremo a
+  extremo, **no** para sostener una afirmación de seguridad clínica real.
 - Este software es un prototipo académico. **No debe usarse para tomar
   decisiones clínicas reales.**
 
@@ -279,7 +282,7 @@ de la variable sin ningún valor real.
 
 ### Comparación real: determinista vs. Gemini
 
-`experiments/compare_backends.py` corre ambos backends sobre las mismas 48
+`experiments/compare_backends.py` corre ambos backends sobre las mismas 74
 viñetas de `data/cases.json` (resultado real en `results/backend_comparison.md`):
 
 ```bash
@@ -288,13 +291,13 @@ python -m experiments.compare_backends
 
 | Métrica | Determinista | Gemini |
 |---|---|---|
-| Cobertura (no abstención) | 0.56 | 0.93 |
-| S (sub-triage ponderado) | 0.083 | 0.000 |
-| Sensibilidad I-II | 0.476 | 0.857 |
-| Recall@k | 0.581 | 0.884 |
-| Tasa de abstención indebida | 0.442 | 0.070 |
+| Cobertura (no abstención) | 0.48 | 0.91 |
+| S (sub-triage ponderado) | 0.125 | 0.000 |
+| Sensibilidad I-II | 0.303 | 0.879 |
+| Recall@k | 0.606 | 0.909 |
+| Tasa de abstención indebida | 0.515 | 0.091 |
 
-Con solo 48 casos esto es ilustrativo, no una conclusión estadística — pero
+Con 74 casos esto sigue siendo ilustrativo, no una conclusión estadística — pero
 la dirección del resultado es consistente con lo esperado: los embeddings
 reales de Gemini (con codificación asimétrica consulta/documento) generalizan
 mucho mejor que TF-IDF ante frases que no comparten vocabulario literal con
@@ -312,7 +315,7 @@ corpus/
   reformatted/    Las mismas guías, reformateadas a texto estructurado con citas
                   (31 fragmentos: 5 niveles + 13 motivos de consulta x 2 ramas)
 data/
-  cases.json      48 viñetas sintéticas con gold standard intra-equipo
+  cases.json      74 viñetas sintéticas con gold standard intra-equipo
   keyword_rules.json  Línea base de reglas (C0), congelada antes de evaluar
   external_triage_urgencias_colombia.csv  Dataset real de Datos Abiertos Colombia (ver abajo)
 src/
@@ -458,20 +461,24 @@ Las fórmulas completas están documentadas como docstrings en `src/metrics.py`.
 ## Resultados
 
 `results/summary.md` y `results/raw_results.json` contienen la salida real de
-`python -m experiments.run_experiment` sobre las 48 viñetas de este
+`python -m experiments.run_experiment` sobre las 74 viñetas de este
 repositorio. Un extracto representativo (los números exactos pueden variar
 levemente si se edita `data/cases.json` o los umbrales de `src/generator.py`):
 
-- Con solo 48 casos, ninguna diferencia entre celdas es estadísticamente
-  concluyente; el valor de este resultado es mostrar que el pipeline y las
-  métricas funcionan de extremo a extremo, no establecer cuál celda "gana".
-- El sistema se abstiene en una fracción considerable de los casos elegibles:
-  es una consecuencia esperada de un corpus todavía acotado (31 fragmentos,
-  ampliado desde los 17 iniciales — ver "Fuentes de datos reales" y el
-  historial de commits) y un umbral de margen conservador, no un error del
-  pipeline. Un corpus aún más completo (60-100 casos y más motivos de
-  consulta, como plantea el documento del proyecto) seguiría reduciendo la
-  tasa de abstención sin relajar el umbral de seguridad.
+- Con 74 casos (ya dentro del rango de 60-100 del protocolo original), las
+  diferencias entre celdas son más estables que con el conjunto reducido de
+  34, pero siguen sin ser una conclusión estadística formal (no se reporta
+  un test de hipótesis entre celdas); el valor de este resultado es mostrar
+  que el pipeline y las métricas funcionan de extremo a extremo sobre un
+  conjunto de tamaño realista, no declarar cuál celda "gana" de forma
+  definitiva.
+- El sistema determinista se sigue absteniendo en una fracción considerable
+  de los casos elegibles: es consecuencia de un umbral de margen conservador
+  sobre un corpus de 31 fragmentos (ampliado desde los 17 iniciales — ver
+  "Fuentes de datos reales" y el historial de commits), no un error del
+  pipeline. El backend Gemini opcional (ver "Backend LLM opcional") reduce
+  esa abstención de forma sustancial sobre el mismo conjunto de 74 casos,
+  a cambio de depender de una API externa.
 
 ## Limitaciones (heredadas del documento del proyecto)
 
@@ -485,7 +492,7 @@ levemente si se edita `data/cases.json` o los umbrales de `src/generator.py`):
   existe un backend opcional con embeddings y LLM reales de Gemini (ver
   "Backend LLM opcional"), pero depende de una API externa, tiene costo por
   llamada, y su evaluación (`compare_backends.py`) es tan ilustrativa como la
-  del diseño 2x2 (48 casos, no concluyente estadísticamente).
+  del diseño 2x2 (74 casos, no concluyente estadísticamente).
 - La evaluación central (`run_experiment.py`, diseño 2x2) es 100% offline y
   por lotes; no mide latencia bajo concurrencia ni incluye un despliegue en
   producción. El backend Gemini sí depende de red, pero sigue evaluándose
@@ -508,11 +515,13 @@ pendientes:
   (p. ej. sobre ClinText-SP o CoWeSe, ver "Fuentes de datos reales") en vez
   de depender de la API de un proveedor externo — reduciría costo y
   dependencia de red, a cambio de mantenimiento propio del modelo.
-- Ampliar `data/cases.json` a 60-100 casos con doble ciego real por
-  evaluadores clínicos externos, siguiendo el esquema ya definido en cada
-  registro (`evaluator1`, `evaluator2`, `resolution_method`, etc.) — sigue
-  siendo la brecha más importante para pasar de "prototipo funcional" a
-  "evidencia de seguridad clínica real" (ver "Limitaciones").
+- `data/cases.json` ya tiene 74 casos (dentro del rango de 60-100 del
+  protocolo original), pero el doble ciego lo hizo el propio equipo. Repetir
+  el etiquetado con evaluadores clínicos externos reales, siguiendo el
+  esquema ya definido en cada registro (`evaluator1`, `evaluator2`,
+  `resolution_method`, etc.), sigue siendo la brecha más importante para
+  pasar de "prototipo funcional" a "evidencia de seguridad clínica real"
+  (ver "Limitaciones").
 - Validar la generalización de la arquitectura con MIMIC-IV-ED (en inglés)
   antes de intentar una validación clínica formal en español.
 - Si se despliega el backend Gemini en producción: mover la API key a un

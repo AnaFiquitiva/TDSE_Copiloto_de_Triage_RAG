@@ -1,107 +1,107 @@
 {
   "kappa_intra_equipo": {
-    "n_pares": 44,
-    "kappa_ponderado_cuadratico": 0.9719101123595506
+    "n_pares": 68,
+    "kappa_ponderado_cuadratico": 0.9531196139262323
   },
   "baseline_C0": {
     "cell": "C0",
     "descripcion": "Linea base de reglas (arbol de decision congelado, sin RAG)",
-    "n_eligible_cases": 43,
-    "S_sub_triage": 0.5813953488372093,
+    "n_eligible_cases": 66,
+    "S_sub_triage": 0.5454545454545454,
     "S_por_nivel": {
-      "1": 1.5714285714285714,
-      "2": 0.42857142857142855,
+      "1": 1.4444444444444444,
+      "2": 0.6666666666666666,
       "3": 0.0,
       "4": 0.0,
       "5": 0.0
     },
-    "sensibilidad_I_II": 0.3333333333333333,
-    "fidelidad_citacion": 0.27906976744186046
+    "sensibilidad_I_II": 0.30303030303030304,
+    "fidelidad_citacion": 0.22727272727272727
   },
   "celdas": [
     {
       "cell": "E1",
       "corpus_format": "raw",
       "embedding_mode": "generic",
-      "n_eligible_cases": 43,
-      "n_abstained_among_eligible": 22,
-      "cobertura": 0.4883720930232558,
-      "S_sub_triage": 0.09523809523809523,
+      "n_eligible_cases": 66,
+      "n_abstained_among_eligible": 35,
+      "cobertura": 0.4696969696969697,
+      "S_sub_triage": 0.25806451612903225,
       "S_por_nivel": {
-        "1": 0.09090909090909091,
-        "2": 0.2,
+        "1": 0.08333333333333333,
+        "2": 0.6,
         "3": 0.0,
-        "4": 0.0,
+        "4": 0.5,
         "5": 0.0
       },
-      "sensibilidad_I_II": 0.7142857142857143,
-      "recall_at_k": 0.4883720930232558,
-      "fidelidad_citacion": 0.42857142857142855,
-      "tasa_abstencion_correcta": 0.75,
-      "tasa_abstencion_indebida": 0.5116279069767442
+      "sensibilidad_I_II": 0.48484848484848486,
+      "recall_at_k": 0.5,
+      "fidelidad_citacion": 0.3870967741935484,
+      "tasa_abstencion_correcta": 0.5,
+      "tasa_abstencion_indebida": 0.5303030303030303
     },
     {
       "cell": "E2",
       "corpus_format": "reformatted",
       "embedding_mode": "generic",
-      "n_eligible_cases": 43,
-      "n_abstained_among_eligible": 24,
-      "cobertura": 0.4418604651162791,
-      "S_sub_triage": 0.0,
+      "n_eligible_cases": 66,
+      "n_abstained_among_eligible": 39,
+      "cobertura": 0.4090909090909091,
+      "S_sub_triage": 0.07407407407407407,
       "S_por_nivel": {
         "1": 0.0,
-        "2": 0.0,
+        "2": 0.6666666666666666,
         "3": 0.0,
         "4": 0.0,
         "5": 0.0
       },
-      "sensibilidad_I_II": 0.3333333333333333,
-      "recall_at_k": 0.5116279069767442,
-      "fidelidad_citacion": 0.42105263157894735,
-      "tasa_abstencion_correcta": 0.75,
-      "tasa_abstencion_indebida": 0.5581395348837209
+      "sensibilidad_I_II": 0.21212121212121213,
+      "recall_at_k": 0.5606060606060606,
+      "fidelidad_citacion": 0.4074074074074074,
+      "tasa_abstencion_correcta": 0.5,
+      "tasa_abstencion_indebida": 0.5909090909090909
     },
     {
       "cell": "E3",
       "corpus_format": "raw",
       "embedding_mode": "clinical_es",
-      "n_eligible_cases": 43,
-      "n_abstained_among_eligible": 21,
-      "cobertura": 0.5116279069767442,
-      "S_sub_triage": 0.09090909090909091,
+      "n_eligible_cases": 66,
+      "n_abstained_among_eligible": 34,
+      "cobertura": 0.48484848484848486,
+      "S_sub_triage": 0.25,
       "S_por_nivel": {
-        "1": 0.08333333333333333,
-        "2": 0.25,
+        "1": 0.07692307692307693,
+        "2": 0.6666666666666666,
         "3": 0.0,
-        "4": 0.0,
+        "4": 0.5,
         "5": 0.0
       },
-      "sensibilidad_I_II": 0.7142857142857143,
-      "recall_at_k": 0.5581395348837209,
-      "fidelidad_citacion": 0.5,
-      "tasa_abstencion_correcta": 0.75,
-      "tasa_abstencion_indebida": 0.4883720930232558
+      "sensibilidad_I_II": 0.48484848484848486,
+      "recall_at_k": 0.5454545454545454,
+      "fidelidad_citacion": 0.4375,
+      "tasa_abstencion_correcta": 0.5,
+      "tasa_abstencion_indebida": 0.5151515151515151
     },
     {
       "cell": "E4",
       "corpus_format": "reformatted",
       "embedding_mode": "clinical_es",
-      "n_eligible_cases": 43,
-      "n_abstained_among_eligible": 19,
-      "cobertura": 0.5581395348837209,
-      "S_sub_triage": 0.08333333333333333,
+      "n_eligible_cases": 66,
+      "n_abstained_among_eligible": 34,
+      "cobertura": 0.48484848484848486,
+      "S_sub_triage": 0.125,
       "S_por_nivel": {
         "1": 0.2857142857142857,
-        "2": 0.0,
+        "2": 0.3333333333333333,
         "3": 0.0,
         "4": 0.0,
         "5": 0.0
       },
-      "sensibilidad_I_II": 0.47619047619047616,
-      "recall_at_k": 0.5813953488372093,
-      "fidelidad_citacion": 0.4166666666666667,
-      "tasa_abstencion_correcta": 0.75,
-      "tasa_abstencion_indebida": 0.4418604651162791
+      "sensibilidad_I_II": 0.30303030303030304,
+      "recall_at_k": 0.6060606060606061,
+      "fidelidad_citacion": 0.40625,
+      "tasa_abstencion_correcta": 0.5,
+      "tasa_abstencion_indebida": 0.5151515151515151
     }
   ]
 }

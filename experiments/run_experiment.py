@@ -153,9 +153,10 @@ def format_markdown(kappa: dict, baseline: dict, cells: list[dict], n_total_case
         "",
         "Generado automáticamente por `experiments/run_experiment.py`. Estas cifras son "
         f"el resultado de ejecutar el pipeline sobre las {n_total_cases} viñetas sintéticas "
-        "de `data/cases.json` (versión reducida e ilustrativa del protocolo de 60-100 casos "
-        "descrito en el documento del proyecto); no constituyen una validación clínica "
-        "externa (ver `README.md`, sección de limitaciones).",
+        "de `data/cases.json` (dentro del rango de 60-100 casos del protocolo del "
+        "documento del proyecto, pero con doble ciego intra-equipo, no evaluadores "
+        "clínicos externos); no constituyen una validación clínica externa (ver "
+        "`README.md`, sección de limitaciones).",
         "",
         "## Acuerdo intra-equipo (gold standard)",
         "",
