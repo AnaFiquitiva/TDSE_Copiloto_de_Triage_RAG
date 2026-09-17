@@ -35,6 +35,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from src.stats import build_contingency_table, chi_square_independence_test  # noqa: E402
+
 try:
     sys.stdout.reconfigure(encoding="utf-8")
 except AttributeError:
@@ -68,6 +70,26 @@ def time_to_attention_minutes(rows: list[dict]) -> dict[str, list[float]]:
             continue
         durations[row["triage"]].append(delta_min)
     return durations
+
+
+def distribution_by_group(rows: list[dict], group_key: str) -> dict[str, Counter]:
+    by_group: dict[str, Counter] = defaultdict(Counter)
+    for row in rows:
+        by_group[row[group_key]][row["triage"]] += 1
+    return by_group
+
+
+def independence_test_by_group(rows: list[dict], group_key: str) -> dict:
+    """¿La distribución de niveles de triage difiere significativamente entre
+    los grupos de ``group_key`` (p. ej. entre redes de IPS)? Prueba
+    chi-cuadrado de independencia sobre la tabla de contingencia
+    (grupo x nivel)."""
+    row_labels, col_labels, table = build_contingency_table(rows, group_key, "triage")
+    result = chi_square_independence_test(table)
+    result["row_labels"] = row_labels
+    result["col_labels"] = col_labels
+    result["table"] = table
+    return result
 
 
 def format_markdown(rows: list[dict], distribution: Counter, durations: dict[str, list[float]]) -> str:
@@ -119,7 +141,38 @@ def format_markdown(rows: list[dict], distribution: Counter, durations: dict[str
         lines.append(
             f"| {level} | {len(d)} | {statistics.median(d):.1f} | {statistics.mean(d):.1f} |"
         )
-    lines.append("")
+
+    by_red = distribution_by_group(rows, "red")
+    red_test = independence_test_by_group(rows, "red")
+    lines += [
+        "",
+        "## Distribución de niveles por red de IPS",
+        "",
+        "| Red | N | " + " | ".join(LEVEL_ORDER) + " |",
+        "|---|---|" + "---|" * len(LEVEL_ORDER),
+    ]
+    for red in sorted(by_red):
+        counts = by_red[red]
+        n_red = sum(counts.values())
+        pcts = " | ".join(f"{100*counts.get(lvl,0)/n_red:.1f}%" for lvl in LEVEL_ORDER)
+        lines.append(f"| {red} | {n_red} | {pcts} |")
+
+    lines += [
+        "",
+        f"**Prueba de independencia chi-cuadrado** (¿la distribución de niveles "
+        f"depende de la red?): χ² = {red_test['chi2']:.2f}, "
+        f"df = {red_test['df']}, p = {red_test['p_value']:.2e}. "
+        + (
+            "La diferencia entre redes es estadísticamente significativa (p < 0.01); "
+            "esto sugiere que la práctica de clasificación (o la población atendida) "
+            "no es homogénea entre redes, lo cual es relevante si en una fase futura "
+            "se usara este dataset para calibrar el prototipo por región."
+            if red_test["p_value"] < 0.01
+            else "No hay evidencia suficiente de que la distribución de niveles "
+            "difiera entre redes."
+        ),
+        "",
+    ]
     return "\n".join(lines)
 
 

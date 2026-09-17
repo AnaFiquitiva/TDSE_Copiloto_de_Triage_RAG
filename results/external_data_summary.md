@@ -27,3 +27,14 @@ Se descartan registros con duración negativa o mayor a 24 horas (errores de cap
 | III | 79029 | 35.0 | 52.9 |
 | IV | 6929 | 74.0 | 89.2 |
 | V | 405 | 79.0 | 98.1 |
+
+## Distribución de niveles por red de IPS
+
+| Red | N | I | II | III | IV | V |
+|---|---|---|---|---|---|---|
+| RED NORTE | 33275 | 0.3% | 2.8% | 84.4% | 12.3% | 0.3% |
+| RED OCCIDENTE | 27044 | 0.1% | 2.7% | 94.0% | 3.1% | 0.1% |
+| RED ORIENTE | 230 | 0.0% | 3.5% | 89.6% | 7.0% | 0.0% |
+| RED SUR | 28904 | 0.3% | 3.6% | 88.2% | 6.9% | 1.0% |
+
+**Prueba de independencia chi-cuadrado** (¿la distribución de niveles depende de la red?): χ² = 2161.62, df = 12, p = 0.00e+00. La diferencia entre redes es estadísticamente significativa (p < 0.01); esto sugiere que la práctica de clasificación (o la población atendida) no es homogénea entre redes, lo cual es relevante si en una fase futura se usara este dataset para calibrar el prototipo por región.

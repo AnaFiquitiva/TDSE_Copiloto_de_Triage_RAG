@@ -96,6 +96,51 @@ conceptualmente en el documento. La integración con historia clínica (FHIR),
 la multi-tenencia y el despliegue como servicio quedan fuera de esta
 arquitectura de prototipo (ver "Limitaciones").
 
+### ¿Por qué esta arquitectura?
+
+Cada decisión de diseño responde a una restricción concreta del proyecto (un
+prototipo académico, de un semestre, sin acceso garantizado a internet ni a
+servicios pagos, evaluado offline) y no a preferencia arbitraria:
+
+- **Recuperación separada de generación (RAG explícito, no un LLM "a secas”).**
+  El documento del proyecto exige que toda sugerencia sea trazable a una
+  fuente normativa citable y que el sistema se abstenga si no hay evidencia
+  suficiente (principio "evidencia y trazabilidad"). Eso solo es verificable
+  si la recuperación es una etapa independiente e inspeccionable, no un paso
+  oculto dentro de un modelo de lenguaje. Por eso `retrieval.py` y
+  `generator.py` son módulos separados con una interfaz explícita
+  (`RankedChunk` con `chunk_id` y `score`).
+- **TF-IDF propio en vez de un modelo de embeddings real.** El entorno de
+  ejecución no garantiza acceso a internet para descargar pesos
+  preentrenados, y el proyecto exige que la evaluación offline sea
+  100% reproducible sin credenciales externas. TF-IDF con la biblioteca
+  estándar cumple ambas condiciones y es suficiente para ejercitar el diseño
+  2x2; se sacrifica precisión semántica frente a un embedding real, una
+  limitación documentada explícitamente en vez de disimulada.
+- **Vecino-más-cercano con margen, en vez de un LLM generativo, para el
+  componente 3.** Un LLM real introduciría una dependencia de red/API (rompe
+  la reproducibilidad offline) y opacidad (dificulta auditar por qué se
+  sugirió un nivel). La regla determinista es más simple pero **su
+  comportamiento es 100% explicable**: la cita siempre corresponde
+  exactamente al fragmento que ganó la decisión. El punto de extensión para
+  reemplazarla por un LLM real ya está aislado en `MinimalGenerator.suggest`.
+- **Línea base de reglas totalmente separada del copiloto.** Si la línea base
+  reutilizara el mismo `Retriever`, cualquier mejora en recuperación
+  contaminaría también a la línea base, y H1/H2 dejarían de medir lo que
+  el documento del proyecto pide medir (RAG vs. reglas). Por eso
+  `baseline.py` no importa nada de `retrieval.py` ni `generator.py`.
+- **Auditoría como módulo transversal, no como responsabilidad del
+  generador.** Si `generator.py` escribiera directamente al registro, cambiar
+  el formato de auditoría obligaría a tocar la lógica de decisión. Separar
+  `audit.py` permite versionar el esquema de trazabilidad de forma
+  independiente, como pide la Sección 4.3 del documento del proyecto.
+- **Sin capa de servicio/API.** El documento del proyecto acota
+  explícitamente el semestre a una evaluación offline por lotes (Tabla de
+  alcance): el despliegue como servicio, la multi-tenencia y la
+  interoperabilidad FHIR se declaran fuera de alcance. Añadir un servidor web
+  habría sido trabajo no evaluable dentro del diseño experimental 2x2 y una
+  dependencia externa (framework web) que el proyecto evita a propósito.
+
 ## Aviso importante
 
 - El texto de `corpus/` es una **reconstrucción sintética**, elaborada por el
@@ -125,6 +170,37 @@ python -m unittest discover -s tests -v   # correr las pruebas
 python -m experiments.run_experiment      # correr el diseño 2x2 + linea base
 python -m experiments.analyze_external_data  # analizar el dataset real (ver abajo)
 python demo.py "el paciente tiene dolor en el pecho y sudoracion fria"
+python gui.py                              # interfaz grafica (ver "Interfaz grafica")
+```
+
+## Interfaz gráfica
+
+`gui.py` es una interfaz de escritorio (Tkinter, incluido en la instalación
+estándar de Python; no agrega dependencias) con tres pestañas, cada una
+envolviendo un punto de entrada ya existente del prototipo — no duplica
+lógica, solo la expone visualmente:
+
+1. **Consulta individual**: caja de texto para el relato del paciente,
+   selector de corpus (`raw`/`reformatted`) y de embeddings
+   (`generic`/`clinical_es`), y un botón que muestra la sugerencia del
+   copiloto (nivel + cita, o abstención con su razón), los fragmentos
+   recuperados con su score, y la sugerencia de la línea base C0 para
+   comparar. Es el equivalente gráfico de `demo.py`.
+2. **Experimento 2x2**: un botón que corre las celdas E1-E4 más C0 sobre
+   `data/cases.json` y muestra la misma tabla de resultados que
+   `python -m experiments.run_experiment`.
+3. **Dataset real**: un botón que analiza
+   `data/external_triage_urgencias_colombia.csv` y muestra el mismo resumen
+   que `python -m experiments.analyze_external_data` (distribución de
+   niveles, tiempos de atención, y la prueba chi-cuadrado por red de IPS).
+
+Cada botón corre el cómputo en un hilo en segundo plano para no congelar la
+ventana; los resultados se entregan de vuelta al hilo principal de Tkinter
+con `widget.after(...)`, que es la forma segura de actualizar la interfaz
+desde un hilo secundario.
+
+```bash
+python gui.py
 ```
 
 ## Estructura del repositorio
@@ -143,6 +219,7 @@ src/
   generator.py    Componente 3 mínimo: nivel + cita, o abstención
   baseline.py     Línea base C0 (árbol de reglas, sin RAG)
   metrics.py      S (sub-triage), kappa ponderado, recall@k, abstención
+  stats.py        Utilidades estadísticas genéricas (chi-cuadrado, tablas de contingencia)
   audit.py        Registro de auditoría (JSON Lines)
   pipeline.py     Orquesta un caso: recuperación -> generación -> auditoría
 experiments/
@@ -153,8 +230,9 @@ results/
   raw_results.json            Resultados en JSON (generado por run_experiment.py)
   audit_*.jsonl                Registro de auditoría por celda (generado por run_experiment.py)
   external_data_summary.md    Análisis del dataset real (generado por analyze_external_data.py)
-tests/            Pruebas unitarias de cada módulo
+tests/            Pruebas unitarias de cada módulo (incluye tests/test_gui.py)
 demo.py           CLI de una sola consulta, para inspección manual
+gui.py            Interfaz gráfica de escritorio (Tkinter), ver "Interfaz gráfica"
 ```
 
 ## Fuentes de datos reales
@@ -185,6 +263,13 @@ fuente:
     ingreso a atención por nivel, en lugar de las cifras puramente
     hipotéticas que el documento del proyecto declaraba explícitamente como
     no medidas.
+  - Adicionalmente, una prueba de independencia chi-cuadrado (nivel de
+    triage x red de IPS, implementada en `src/stats.py` sin dependencias
+    externas) encuentra una diferencia estadísticamente significativa entre
+    redes (χ² ≈ 2162, df = 12, p ≈ 0): por ejemplo, RED OCCIDENTE clasifica
+    solo 3.1% de sus casos como Nivel IV, frente a 12.3% en RED NORTE. Esto
+    sugiere heterogeneidad real en el criterio de clasificación entre redes,
+    relevante para cualquier calibración futura del prototipo por región.
 
 ### Relevantes para una fase posterior (no integradas)
 
