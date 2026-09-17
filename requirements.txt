@@ -1,0 +1,6 @@
+# Este prototipo funciona con la biblioteca estandar de Python 3.10+
+# (no requiere dependencias externas), para que el pipeline offline sea
+# reproducible sin acceso a internet ni a paquetes de terceros.
+#
+# Si en una fase posterior se integra un modelo de embeddings real (p. ej.
+# sentence-transformers) o un LLM via API, agregar aqui esas dependencias.

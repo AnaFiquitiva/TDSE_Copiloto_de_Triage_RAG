@@ -1,0 +1,85 @@
+{
+  "_nota": "Linea base de reglas (C0), congelada antes de ejecutar la evaluacion sobre las celdas E1-E4 (ver Seccion 5 del documento del proyecto). Se evalua en orden de prioridad de nivel I a V; gana la primera regla que encuentre al menos una palabra clave en el relato. Si ninguna regla coincide, se aplica el nivel por defecto documentado en 'default'.",
+  "priority_order": [1, 2, 3, 4, 5],
+  "rules": {
+    "1": {
+      "citation": "RES5596-N1",
+      "keywords": [
+        "paro cardiorrespiratorio",
+        "no respira",
+        "dejo de respirar",
+        "no reacciona",
+        "inconsciente",
+        "no tiene pulso",
+        "hemorragia masiva",
+        "no cede con presion",
+        "en shock",
+        "esta en shock"
+      ]
+    },
+    "2": {
+      "citation": "RES5596-N2",
+      "keywords": [
+        "dolor en el pecho",
+        "dolor de pecho",
+        "dolor toracico",
+        "dificultad para respirar",
+        "le falta el aire",
+        "no puede respirar bien",
+        "se ahoga",
+        "convulsiono",
+        "empezo a convulsionar",
+        "plan para suicidarse",
+        "quiere quitarse la vida",
+        "quiere hacerse dano",
+        "sangra mucho",
+        "no para de sangrar",
+        "perdio el conocimiento",
+        "se desmayo"
+      ]
+    },
+    "3": {
+      "citation": "RES5596-N3",
+      "keywords": [
+        "fiebre alta",
+        "mucha fiebre",
+        "fiebre muy alta",
+        "dolor abdominal fuerte",
+        "dolor abdominal intenso",
+        "vomito con diarrea",
+        "diarrea con deshidratacion",
+        "sospecha de fractura",
+        "dolor moderado",
+        "dolor fuerte"
+      ]
+    },
+    "4": {
+      "citation": "RES5596-N4",
+      "keywords": [
+        "herida pequena",
+        "herida leve",
+        "dolor leve",
+        "sintomas de gripa",
+        "gripa leve",
+        "raspon",
+        "esguince leve"
+      ]
+    },
+    "5": {
+      "citation": "RES5596-N5",
+      "keywords": [
+        "certificado medico",
+        "incapacidad",
+        "tramite administrativo",
+        "control rutinario",
+        "cita de control",
+        "renovar formula"
+      ]
+    }
+  },
+  "default": {
+    "level": 3,
+    "citation": "RES5596-N3",
+    "justificacion": "Ante ausencia de palabras clave reconocidas, la linea base asume un nivel intermedio (Urgencia) en lugar del extremo mas leve, como salvaguarda conservadora frente al riesgo de sub-triage; esta decision se documenta y congela antes de la evaluacion."
+  }
+}

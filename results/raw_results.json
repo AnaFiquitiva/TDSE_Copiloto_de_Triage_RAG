@@ -1,0 +1,107 @@
+{
+  "kappa_intra_equipo": {
+    "n_pares": 30,
+    "kappa_ponderado_cuadratico": 0.965034965034965
+  },
+  "baseline_C0": {
+    "cell": "C0",
+    "descripcion": "Linea base de reglas (arbol de decision congelado, sin RAG)",
+    "n_eligible_cases": 29,
+    "S_sub_triage": 0.3793103448275862,
+    "S_por_nivel": {
+      "1": 1.1428571428571428,
+      "2": 0.42857142857142855,
+      "3": 0.0,
+      "4": 0.0,
+      "5": 0.0
+    },
+    "sensibilidad_I_II": 0.5,
+    "fidelidad_citacion": 0.41379310344827586
+  },
+  "celdas": [
+    {
+      "cell": "E1",
+      "corpus_format": "raw",
+      "embedding_mode": "generic",
+      "n_eligible_cases": 29,
+      "n_abstained_among_eligible": 14,
+      "cobertura": 0.5172413793103449,
+      "S_sub_triage": 0.26666666666666666,
+      "S_por_nivel": {
+        "1": 1.0,
+        "2": 0.0,
+        "3": 0.0,
+        "4": 0.0,
+        "5": 0.0
+      },
+      "sensibilidad_I_II": 0.5,
+      "recall_at_k": 0.6206896551724138,
+      "fidelidad_citacion": 0.3333333333333333,
+      "tasa_abstencion_correcta": 0.5,
+      "tasa_abstencion_indebida": 0.4827586206896552
+    },
+    {
+      "cell": "E2",
+      "corpus_format": "reformatted",
+      "embedding_mode": "generic",
+      "n_eligible_cases": 29,
+      "n_abstained_among_eligible": 19,
+      "cobertura": 0.3448275862068966,
+      "S_sub_triage": 0.2,
+      "S_por_nivel": {
+        "1": 2.0,
+        "2": 0.0,
+        "3": 0.0,
+        "4": 0.0,
+        "5": 0.0
+      },
+      "sensibilidad_I_II": 0.21428571428571427,
+      "recall_at_k": 0.4827586206896552,
+      "fidelidad_citacion": 0.4,
+      "tasa_abstencion_correcta": 0.75,
+      "tasa_abstencion_indebida": 0.6551724137931034
+    },
+    {
+      "cell": "E3",
+      "corpus_format": "raw",
+      "embedding_mode": "clinical_es",
+      "n_eligible_cases": 29,
+      "n_abstained_among_eligible": 15,
+      "cobertura": 0.4827586206896552,
+      "S_sub_triage": 0.2857142857142857,
+      "S_por_nivel": {
+        "1": 1.3333333333333333,
+        "2": 0.0,
+        "3": 0.0,
+        "4": 0.0,
+        "5": 0.0
+      },
+      "sensibilidad_I_II": 0.42857142857142855,
+      "recall_at_k": 0.6551724137931034,
+      "fidelidad_citacion": 0.35714285714285715,
+      "tasa_abstencion_correcta": 0.5,
+      "tasa_abstencion_indebida": 0.5172413793103449
+    },
+    {
+      "cell": "E4",
+      "corpus_format": "reformatted",
+      "embedding_mode": "clinical_es",
+      "n_eligible_cases": 29,
+      "n_abstained_among_eligible": 15,
+      "cobertura": 0.4827586206896552,
+      "S_sub_triage": 0.35714285714285715,
+      "S_por_nivel": {
+        "1": 2.0,
+        "2": 0.16666666666666666,
+        "3": 0.0,
+        "4": 0.0,
+        "5": 0.0
+      },
+      "sensibilidad_I_II": 0.35714285714285715,
+      "recall_at_k": 0.5517241379310345,
+      "fidelidad_citacion": 0.35714285714285715,
+      "tasa_abstencion_correcta": 0.75,
+      "tasa_abstencion_indebida": 0.5172413793103449
+    }
+  ]
+}

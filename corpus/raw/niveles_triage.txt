@@ -1,0 +1,16 @@
+CRITERIOS DE CLASIFICACION - SISTEMA DE TRIAGE - EXTRACTO DE TRABAJO (version cruda, sin reformatear)
+
+Tabla 1. Niveles | Descripcion | Tiempo
+--------------------------------------------------------------
+N1|Resucitacion - riesgo vital inmediato|paro cardiorrespiratorio,obstruccion via aerea,shock,hemorragia masiva no controlada,alteracion grave del estado de conciencia (Glasgow <=8), trauma multiple con inestabilidad hemodinamica|Atencion inmediata, 0 minutos
+--------------------------------------------------------------
+N2|Emergencia|dolor toracico sugestivo de sindrome coronario agudo,dificultad respiratoria severa (uso de musculos accesorios, saturacion baja),alteracion aguda no grave del estado de conciencia,convulsion activa o postictal,ideacion suicida estructurada con plan,sangrado significativo no controlado,sospecha de accidente cerebrovascular con signos de menos de 4.5 horas de evolucion|Atencion en un tiempo objetivo menor o igual a 30 minutos
+--------------------------------------------------------------
+N3|Urgencia|dolor moderado a severo sin signos de alarma vital,fiebre alta persistente mayor a 39 grados por mas de 24 horas,vomito o diarrea con signos de deshidratacion moderada,trauma con sospecha de fractura sin compromiso neurovascular,dolor abdominal agudo sin signos peritoneales|Atencion en un tiempo objetivo menor o igual a 120 minutos
+--------------------------------------------------------------
+N4|Urgencia menor|sintomas de baja intensidad que no comprometen funcion vital,heridas menores sin compromiso de estructuras profundas,sintomas gripales sin signos de alarma,dolor leve controlado|Atencion en un tiempo objetivo menor o igual a 240 minutos
+--------------------------------------------------------------
+N5|No urgencia|consulta por tramites administrativos,solicitud de certificados o incapacidades,control de sintomas cronicos estables sin descompensacion|Atencion segun disponibilidad, objetivo menor o igual a 360 minutos
+--------------------------------------------------------------
+
+NOTA METODOLOGICA (equipo del proyecto): este documento es una reconstruccion sintetica, elaborada por el equipo, de la ESTRUCTURA GENERAL de cinco niveles de triage utilizada en el sistema colombiano (Resolucion 5596 de 2015) y en escalas internacionales comparables (ESI, CTAS, Manchester). No es una transcripcion literal ni oficial del texto legal, y se usa unicamente con fines academicos para poner a prueba el pipeline de ingesta y recuperacion sobre documentos con formato de tabla dificil de parsear. Cualquier uso clinico real debe remitirse al texto oficial vigente de la Resolucion 5596 de 2015 y sus actualizaciones.

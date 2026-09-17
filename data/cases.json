@@ -1,0 +1,590 @@
+{
+  "_nota": "Conjunto de 34 vinetas sinteticas construidas por el equipo del proyecto siguiendo el protocolo de la Seccion 5 del documento: cada nivel de referencia se deriva de un criterio explicito y citable de la normativa incluida en corpus/, dos evaluadores lo asignan de forma independiente y ciega, y las discrepancias se resuelven segun el protocolo fijo documentado en README.md. Es una version reducida e ilustrativa del protocolo de 60-100 casos descrito en el documento (Seccion 5), suficiente para ejercitar el pipeline y la maquinaria de metricas de extremo a extremo; NO constituye una validacion clinica externa (ver limitaciones en README.md).",
+  "cases": [
+    {
+      "case_id": "C001",
+      "text": "La senora llego sin pulso, no respira y no reacciona a nada; los familiares empezaron a hacerle reanimacion en el carro.",
+      "evaluator1": {
+        "level": 1,
+        "citation": "RES5596-N1"
+      },
+      "evaluator2": {
+        "level": 1,
+        "citation": "RES5596-N1"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 1,
+      "final_citation": "RES5596-N1",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C002",
+      "text": "Se cayo de una altura considerable, quedo inconsciente y no ha despertado desde entonces; tiene la piel muy palida.",
+      "evaluator1": {
+        "level": 1,
+        "citation": "RES5596-N1"
+      },
+      "evaluator2": {
+        "level": 1,
+        "citation": "RES5596-N1"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 1,
+      "final_citation": "RES5596-N1",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C003",
+      "text": "Tiene una herida profunda en el brazo con un sangrado que no cede aunque le hacemos presion directa; ya se ve muy palido, mareado y casi no puede hablar.",
+      "evaluator1": {
+        "level": 1,
+        "citation": "ALARMA-SANGRADO-GRAVE"
+      },
+      "evaluator2": {
+        "level": 1,
+        "citation": "RES5596-N1"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 1,
+      "final_citation": "RES5596-N1",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C004",
+      "text": "El bebe de 2 anos tiene fiebre de 40 grados, esta muy decaido, casi no reacciona y le noto el cuello muy rigido.",
+      "evaluator1": {
+        "level": 1,
+        "citation": "ALARMA-FIEBRE-GRAVE"
+      },
+      "evaluator2": {
+        "level": 2,
+        "citation": "ALARMA-FIEBRE-GRAVE"
+      },
+      "resolution_method": "consenso_tras_discusion",
+      "final_level": 1,
+      "final_citation": "ALARMA-FIEBRE-GRAVE",
+      "ambiguous": false,
+      "should_abstain": false,
+      "nota_resolucion": "Evaluador 2 reconocio que la combinacion de letargia y rigidez de nuca (signo meningeo) que senalo evaluador 1 aplica con mayor precision que un criterio de fiebre aislada."
+    },
+    {
+      "case_id": "C005",
+      "text": "Se esta ahogando con un pedazo de comida, no puede hablar ni toser, y se esta poniendo morado.",
+      "evaluator1": {
+        "level": 1,
+        "citation": "RES5596-N1"
+      },
+      "evaluator2": {
+        "level": 1,
+        "citation": "RES5596-N1"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 1,
+      "final_citation": "RES5596-N1",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C006",
+      "text": "Tuvo un golpe fuerte en la cabeza jugando futbol, vomito varias veces seguidas y ahora tiene una pupila mas grande que la otra.",
+      "evaluator1": {
+        "level": 1,
+        "citation": "ALARMA-TRAUMA-GRAVE"
+      },
+      "evaluator2": {
+        "level": 2,
+        "citation": "ALARMA-TRAUMA-GRAVE"
+      },
+      "evaluator3": {
+        "level": 1,
+        "citation": "ALARMA-TRAUMA-GRAVE"
+      },
+      "resolution_method": "desempate_tercer_integrante",
+      "final_level": 1,
+      "final_citation": "ALARMA-TRAUMA-GRAVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C007",
+      "text": "Despues del choque el conductor esta muy palido, con el pulso muy rapido y debil, y no responde bien cuando le hablamos.",
+      "evaluator1": {
+        "level": 1,
+        "citation": "RES5596-N1"
+      },
+      "evaluator2": {
+        "level": 1,
+        "citation": "RES5596-N1"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 1,
+      "final_citation": "RES5596-N1",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C008",
+      "text": "Desde hace media hora tengo un dolor en el pecho que se corre hacia el brazo izquierdo, estoy sudando frio y antes he tenido problemas del corazon.",
+      "evaluator1": {
+        "level": 2,
+        "citation": "ALARMA-DOLOR-TORACICO-GRAVE"
+      },
+      "evaluator2": {
+        "level": 2,
+        "citation": "ALARMA-DOLOR-TORACICO-GRAVE"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 2,
+      "final_citation": "ALARMA-DOLOR-TORACICO-GRAVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C009",
+      "text": "Me falta el aire desde hace una hora, no puedo respirar bien, tengo los labios morados y siento que me ahogo.",
+      "evaluator1": {
+        "level": 2,
+        "citation": "ALARMA-DIFRESP-GRAVE"
+      },
+      "evaluator2": {
+        "level": 2,
+        "citation": "ALARMA-DIFRESP-GRAVE"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 2,
+      "final_citation": "ALARMA-DIFRESP-GRAVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C010",
+      "text": "Empezo a convulsionar hace unos minutos, todavia le dieron temblores fuertes en todo el cuerpo y no responde con claridad despues.",
+      "evaluator1": {
+        "level": 2,
+        "citation": "RES5596-N2"
+      },
+      "evaluator2": {
+        "level": 2,
+        "citation": "RES5596-N2"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 2,
+      "final_citation": "RES5596-N2",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C011",
+      "text": "Me siento muy mal y ya tengo un plan para quitarme la vida, incluso ya tengo listo lo que voy a usar.",
+      "evaluator1": {
+        "level": 2,
+        "citation": "ALARMA-SUICIDA-GRAVE"
+      },
+      "evaluator2": {
+        "level": 2,
+        "citation": "ALARMA-SUICIDA-GRAVE"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 2,
+      "final_citation": "ALARMA-SUICIDA-GRAVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C012",
+      "text": "Tiene una cortada en la pierna que sangra mucho y no para de sangrar desde hace veinte minutos, aunque todavia responde y habla bien.",
+      "evaluator1": {
+        "level": 2,
+        "citation": "RES5596-N2"
+      },
+      "evaluator2": {
+        "level": 2,
+        "citation": "RES5596-N2"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 2,
+      "final_citation": "RES5596-N2",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C013",
+      "text": "Empezaron a hablarme raro y de pronto no reconocia a su familia, se le torcio la boca de un lado hace menos de una hora.",
+      "evaluator1": {
+        "level": 2,
+        "citation": "RES5596-N2"
+      },
+      "evaluator2": {
+        "level": 2,
+        "citation": "RES5596-N2"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 2,
+      "final_citation": "RES5596-N2",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C014",
+      "text": "Se desmayo de repente en la calle, cuando desperto estaba muy confundido y no sabia donde estaba.",
+      "evaluator1": {
+        "level": 2,
+        "citation": "RES5596-N2"
+      },
+      "evaluator2": {
+        "level": 2,
+        "citation": "RES5596-N2"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 2,
+      "final_citation": "RES5596-N2",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C015",
+      "text": "Tengo un dolor en el pecho como una punzada que aumenta cuando respiro hondo, pero no me duele el brazo ni he sudado frio.",
+      "evaluator1": {
+        "level": 3,
+        "citation": "ALARMA-DOLOR-TORACICO-LEVE"
+      },
+      "evaluator2": {
+        "level": 2,
+        "citation": "ALARMA-DOLOR-TORACICO-GRAVE"
+      },
+      "resolution_method": "consenso_tras_discusion",
+      "final_level": 3,
+      "final_citation": "ALARMA-DOLOR-TORACICO-LEVE",
+      "ambiguous": false,
+      "should_abstain": false,
+      "nota_resolucion": "Evaluador 2 acepto que el criterio de evaluador 1 (dolor punzante que aumenta con la respiracion, sin sudoracion ni irradiacion) corresponde al segundo supuesto del flujograma de dolor toracico, no al primero."
+    },
+    {
+      "case_id": "C016",
+      "text": "Llevo mas de un dia con fiebre muy alta que no baja con nada, me duele todo el cuerpo pero estoy consciente y hablando normal.",
+      "evaluator1": {
+        "level": 3,
+        "citation": "RES5596-N3"
+      },
+      "evaluator2": {
+        "level": 3,
+        "citation": "RES5596-N3"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 3,
+      "final_citation": "RES5596-N3",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C017",
+      "text": "Ha tenido vomito y diarrea desde ayer, se ve con la boca seca y un poco decaido, pero todavia responde bien y camina.",
+      "evaluator1": {
+        "level": 3,
+        "citation": "RES5596-N3"
+      },
+      "evaluator2": {
+        "level": 3,
+        "citation": "RES5596-N3"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 3,
+      "final_citation": "RES5596-N3",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C018",
+      "text": "Se torcio el tobillo jugando y ahora esta muy hinchado y no puede apoyar el pie, cree que puede estar roto.",
+      "evaluator1": {
+        "level": 3,
+        "citation": "RES5596-N3"
+      },
+      "evaluator2": {
+        "level": 3,
+        "citation": "RES5596-N3"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 3,
+      "final_citation": "RES5596-N3",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C019",
+      "text": "Tiene un dolor fuerte en la barriga desde hace varias horas, se queja mucho pero no tiene la barriga dura ni rechaza que se la toquen.",
+      "evaluator1": {
+        "level": 3,
+        "citation": "RES5596-N3"
+      },
+      "evaluator2": {
+        "level": 3,
+        "citation": "RES5596-N3"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 3,
+      "final_citation": "RES5596-N3",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C020",
+      "text": "El paciente dice que a veces le duele el pecho y a veces siente que le falta el aire, pero no sabe bien cuando ni con que se relaciona, y hoy no tiene ninguno de los dos sintomas.",
+      "evaluator1": {
+        "level": 3,
+        "citation": "ALARMA-DOLOR-TORACICO-LEVE"
+      },
+      "evaluator2": {
+        "level": 4,
+        "citation": "RES5596-N4"
+      },
+      "resolution_method": "ambiguo",
+      "final_level": null,
+      "final_citation": null,
+      "ambiguous": true,
+      "should_abstain": false,
+      "nota_resolucion": "Ni evaluador 1 ni evaluador 2 lograron citar un criterio inequivoco de la normativa para un relato intermitente y retrospectivo sin sintomas actuales; se excluye del gold standard duro y se documenta como caso ambiguo."
+    },
+    {
+      "case_id": "C021",
+      "text": "Se hizo una raspadura pequena en la rodilla jugando en el parque, esta sangrando muy poco y el nino sigue jugando tranquilo.",
+      "evaluator1": {
+        "level": 4,
+        "citation": "RES5596-N4"
+      },
+      "evaluator2": {
+        "level": 4,
+        "citation": "RES5596-N4"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 4,
+      "final_citation": "RES5596-N4",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C022",
+      "text": "Tiene gripa desde hace dos dias, con mocos y un poco de tos, pero sin fiebre y comiendo normal.",
+      "evaluator1": {
+        "level": 4,
+        "citation": "RES5596-N4"
+      },
+      "evaluator2": {
+        "level": 4,
+        "citation": "RES5596-N4"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 4,
+      "final_citation": "RES5596-N4",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C023",
+      "text": "Le duele un poco la garganta al tragar desde ayer, pero no tiene fiebre y esta comiendo y jugando normal.",
+      "evaluator1": {
+        "level": 4,
+        "citation": "RES5596-N4"
+      },
+      "evaluator2": {
+        "level": 4,
+        "citation": "RES5596-N4"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 4,
+      "final_citation": "RES5596-N4",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C024",
+      "text": "Se golpeo el dedo con una puerta, esta un poco hinchado y le duele leve, pero lo puede mover sin problema.",
+      "evaluator1": {
+        "level": 4,
+        "citation": "RES5596-N4"
+      },
+      "evaluator2": {
+        "level": 4,
+        "citation": "RES5596-N4"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 4,
+      "final_citation": "RES5596-N4",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C025",
+      "text": "Tiene una alergia leve en la piel con un poco de comezon desde esta manana, sin dificultad para respirar ni hinchazon en la cara.",
+      "evaluator1": {
+        "level": 4,
+        "citation": "RES5596-N4"
+      },
+      "evaluator2": {
+        "level": 4,
+        "citation": "RES5596-N4"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 4,
+      "final_citation": "RES5596-N4",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C026",
+      "text": "Vengo a pedir un certificado medico para el trabajo porque me piden constancia de una consulta que ya tuve la semana pasada.",
+      "evaluator1": {
+        "level": 5,
+        "citation": "RES5596-N5"
+      },
+      "evaluator2": {
+        "level": 5,
+        "citation": "RES5596-N5"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 5,
+      "final_citation": "RES5596-N5",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C027",
+      "text": "Necesito que me renueven la incapacidad porque ya se vencio y sigo en recuperacion de la cirugia del mes pasado.",
+      "evaluator1": {
+        "level": 5,
+        "citation": "RES5596-N5"
+      },
+      "evaluator2": {
+        "level": 5,
+        "citation": "RES5596-N5"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 5,
+      "final_citation": "RES5596-N5",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C028",
+      "text": "Vengo a mi control de rutina para la presion, me siento bien y solo necesito que me revisen y me renueven la formula.",
+      "evaluator1": {
+        "level": 5,
+        "citation": "RES5596-N5"
+      },
+      "evaluator2": {
+        "level": 5,
+        "citation": "RES5596-N5"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 5,
+      "final_citation": "RES5596-N5",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C029",
+      "text": "Necesito un papel que certifique que estuve en urgencias ayer, para presentarlo en mi trabajo, pero ya me siento bien.",
+      "evaluator1": {
+        "level": 5,
+        "citation": "RES5596-N5"
+      },
+      "evaluator2": {
+        "level": 5,
+        "citation": "RES5596-N5"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 5,
+      "final_citation": "RES5596-N5",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C030",
+      "text": "Vengo por un tramite administrativo para actualizar mis datos de afiliacion, no tengo ningun sintoma ni molestia.",
+      "evaluator1": {
+        "level": 5,
+        "citation": "RES5596-N5"
+      },
+      "evaluator2": {
+        "level": 5,
+        "citation": "RES5596-N5"
+      },
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 5,
+      "final_citation": "RES5596-N5",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C031",
+      "text": "No me siento bien desde hace unos dias, algo me pasa pero no sabria decir que es.",
+      "evaluator1": {
+        "level": null,
+        "citation": null
+      },
+      "evaluator2": {
+        "level": null,
+        "citation": null
+      },
+      "resolution_method": "no_aplica_caso_de_abstencion",
+      "final_level": null,
+      "final_citation": null,
+      "ambiguous": false,
+      "should_abstain": true
+    },
+    {
+      "case_id": "C032",
+      "text": "Algo me duele, no se muy bien donde, y quisiera que me revisen.",
+      "evaluator1": {
+        "level": null,
+        "citation": null
+      },
+      "evaluator2": {
+        "level": null,
+        "citation": null
+      },
+      "resolution_method": "no_aplica_caso_de_abstencion",
+      "final_level": null,
+      "final_citation": null,
+      "ambiguous": false,
+      "should_abstain": true
+    },
+    {
+      "case_id": "C033",
+      "text": "Me siento raro desde esta manana, distinto a lo normal, pero no podria explicar mas.",
+      "evaluator1": {
+        "level": null,
+        "citation": null
+      },
+      "evaluator2": {
+        "level": null,
+        "citation": null
+      },
+      "resolution_method": "no_aplica_caso_de_abstencion",
+      "final_level": null,
+      "final_citation": null,
+      "ambiguous": false,
+      "should_abstain": true
+    },
+    {
+      "case_id": "C034",
+      "text": "Vengo porque mi cuerpo no anda bien ultimamente, en general, sin poder senalar algo puntual.",
+      "evaluator1": {
+        "level": null,
+        "citation": null
+      },
+      "evaluator2": {
+        "level": null,
+        "citation": null
+      },
+      "resolution_method": "no_aplica_caso_de_abstencion",
+      "final_level": null,
+      "final_citation": null,
+      "ambiguous": false,
+      "should_abstain": true
+    }
+  ]
+}

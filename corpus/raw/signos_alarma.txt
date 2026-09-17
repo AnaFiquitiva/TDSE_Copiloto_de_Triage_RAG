@@ -1,0 +1,16 @@
+GUIA DE SEÑALES DE ALARMA - EXTRACTO DE TRABAJO (version cruda, sin reformatear)
+
+Flujograma dolor toracico rama alarma -> dolor opresivo irradiado a brazo o mandibula + sudoracion + antecedente cardiovascular => N2
+Flujograma dolor toracico rama sin alarma -> dolor toracico punzante que aumenta con la respiracion, sin sudoracion ni irradiacion => N3
+Flujograma dificultad respiratoria rama alarma -> saturacion menor a 90% o uso de musculos accesorios o cianosis => N2
+Flujograma dificultad respiratoria rama sin alarma -> dificultad leve para respirar sin saturacion baja, sin musculos accesorios, sin cianosis => N3
+Flujograma fiebre en menores de 5 años rama alarma -> fiebre mayor a 39 grados con letargia o rigidez de nuca o petequias => N1
+Flujograma fiebre en menores de 5 años rama sin alarma -> fiebre sin letargia, sin rigidez de nuca, sin petequias => N4
+Flujograma trauma craneoencefalico rama alarma -> perdida de conciencia prolongada o vomito en proyectil o pupilas asimetricas => N1
+Flujograma trauma craneoencefalico rama sin alarma -> trauma leve sin perdida de conciencia, sin vomito en proyectil, sin pupilas asimetricas => N4
+Flujograma ideacion suicida rama plan estructurado -> hay plan estructurado y medios disponibles => N2
+Flujograma ideacion suicida rama pasiva -> ideacion pasiva sin plan estructurado ni medios disponibles => N3
+Flujograma sangrado rama alarma -> hemorragia que no cede con presion directa o signos de shock => N1
+Flujograma sangrado rama sin alarma -> sangrado leve controlado que cede con presion directa => N4
+
+NOTA (equipo): flujograma reconstruido de forma sintetica por el equipo del proyecto a partir de guias clinicas generales de urgencias, unicamente para efectos de prueba del pipeline; no reemplaza protocolos institucionales oficiales.
