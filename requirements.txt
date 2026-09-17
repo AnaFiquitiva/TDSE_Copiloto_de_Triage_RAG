@@ -1,6 +1,10 @@
 # Este prototipo funciona con la biblioteca estandar de Python 3.10+
-# (no requiere dependencias externas), para que el pipeline offline sea
-# reproducible sin acceso a internet ni a paquetes de terceros.
+# (no requiere dependencias externas de terceros), para que el pipeline
+# offline sea reproducible sin instalar nada.
 #
-# Si en una fase posterior se integra un modelo de embeddings real (p. ej.
-# sentence-transformers) o un LLM via API, agregar aqui esas dependencias.
+# El backend LLM opcional (Gemini, ver README.md "Backend LLM opcional")
+# tambien usa solo la biblioteca estandar (urllib) en vez del SDK oficial
+# google-generativeai, a proposito, para no romper esta politica de cero
+# dependencias. Si en el futuro se prefiere el SDK oficial (mas features,
+# mas mantenimiento upstream) o un modelo de embeddings local (p. ej.
+# sentence-transformers), agregar esa dependencia aqui.

@@ -24,6 +24,7 @@ def build_audit_record(
     embedding_mode: str,
     suggestion: Suggestion,
     human_decision: dict | None = None,
+    backend: str = "deterministic",
 ) -> dict:
     return {
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
@@ -31,6 +32,11 @@ def build_audit_record(
         "input_text": patient_text,
         "corpus_format": corpus_format,
         "embedding_mode": embedding_mode,
+        # "deterministic": TF-IDF + vecino-mas-cercano (por defecto, sin red).
+        # "gemini": embeddings + generacion via API de Gemini.
+        # "gemini_fallback_deterministic": se pidio 'gemini' pero fallo (sin
+        # API key o error de red) y el pipeline cayo al backend deterministico.
+        "backend": backend,
         "model_version": AUDIT_MODEL_VERSION,
         "retrieved_fragments": [
             {

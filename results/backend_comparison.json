@@ -1,0 +1,29 @@
+{
+  "deterministic": {
+    "backend_solicitado": "deterministic",
+    "backend_realmente_usado": {
+      "deterministic": 34
+    },
+    "n_eligible_cases": 29,
+    "cobertura": 0.4827586206896552,
+    "S_sub_triage": 0.35714285714285715,
+    "sensibilidad_I_II": 0.35714285714285715,
+    "recall_at_k": 0.5517241379310345,
+    "tasa_abstencion_correcta": 0.75,
+    "tasa_abstencion_indebida": 0.5172413793103449
+  },
+  "gemini": {
+    "backend_solicitado": "gemini",
+    "backend_realmente_usado": {
+      "gemini": 33,
+      "gemini_fallback_deterministic": 1
+    },
+    "n_eligible_cases": 29,
+    "cobertura": 0.896551724137931,
+    "S_sub_triage": 0.0,
+    "sensibilidad_I_II": 0.9285714285714286,
+    "recall_at_k": 0.8620689655172413,
+    "tasa_abstencion_correcta": 1.0,
+    "tasa_abstencion_indebida": 0.10344827586206896
+  }
+}

@@ -1,9 +1,10 @@
-import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from src.audit import AuditLog
+from src.llm_client import LLMUnavailableError
 from src.pipeline import CopilotoPipeline
 
 
@@ -36,6 +37,41 @@ class TestCopilotoPipeline(unittest.TestCase):
                 self.assertIsNone(suggestion.citation)
             else:
                 self.assertIsNotNone(suggestion.citation)
+
+
+class TestGeminiBackendFallback(unittest.TestCase):
+    def test_missing_api_key_falls_back_to_deterministic_transparently(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.dict("os.environ", {}, clear=True):
+            audit_path = Path(tmp) / "audit.jsonl"
+            pipeline = CopilotoPipeline(
+                corpus_format="reformatted", backend="gemini", audit_path=audit_path
+            )
+            suggestion = pipeline.run_case("T003", "El paciente no respira y no reacciona.")
+
+            # Sin API key, el pipeline nunca debe fallar: cae al determinista.
+            self.assertIsNotNone(suggestion)
+            record = AuditLog(audit_path).read_all()[0]
+            self.assertEqual(record["backend"], "gemini_fallback_deterministic")
+
+    def test_llm_error_during_suggest_falls_back_per_case(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            audit_path = Path(tmp) / "audit.jsonl"
+            pipeline = CopilotoPipeline(
+                corpus_format="reformatted", backend="gemini", audit_path=audit_path
+            )
+            # Forzar que exista un generador LLM "activo" cuyo suggest() falla,
+            # para probar la ruta de fallback por-caso (no solo la de arranque).
+            pipeline._llm_generator = _AlwaysFailingGenerator()
+
+            suggestion = pipeline.run_case("T004", "vengo a pedir un certificado medico")
+            self.assertIsNotNone(suggestion)
+            record = AuditLog(audit_path).read_all()[0]
+            self.assertEqual(record["backend"], "gemini_fallback_deterministic")
+
+
+class _AlwaysFailingGenerator:
+    def suggest(self, patient_text):
+        raise LLMUnavailableError("fallo simulado de red")
 
 
 if __name__ == "__main__":

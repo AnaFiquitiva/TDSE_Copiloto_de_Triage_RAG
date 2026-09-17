@@ -110,20 +110,26 @@ servicios pagos, evaluado offline) y no a preferencia arbitraria:
   oculto dentro de un modelo de lenguaje. Por eso `retrieval.py` y
   `generator.py` son módulos separados con una interfaz explícita
   (`RankedChunk` con `chunk_id` y `score`).
-- **TF-IDF propio en vez de un modelo de embeddings real.** El entorno de
-  ejecución no garantiza acceso a internet para descargar pesos
-  preentrenados, y el proyecto exige que la evaluación offline sea
-  100% reproducible sin credenciales externas. TF-IDF con la biblioteca
-  estándar cumple ambas condiciones y es suficiente para ejercitar el diseño
-  2x2; se sacrifica precisión semántica frente a un embedding real, una
-  limitación documentada explícitamente en vez de disimulada.
-- **Vecino-más-cercano con margen, en vez de un LLM generativo, para el
-  componente 3.** Un LLM real introduciría una dependencia de red/API (rompe
-  la reproducibilidad offline) y opacidad (dificulta auditar por qué se
-  sugirió un nivel). La regla determinista es más simple pero **su
+- **TF-IDF propio como backend por defecto, embeddings reales como opción.**
+  El diseño experimental 2x2 (Sección "Diseño experimental") exige una
+  evaluación offline 100% reproducible sin credenciales externas, así que el
+  backend *por defecto* no puede depender de una API. TF-IDF con la
+  biblioteca estándar cumple esa condición. Para quien quiera más precisión
+  semántica a cambio de depender de una API externa, `GeminiRetriever` (ver
+  "Backend LLM opcional") ofrece embeddings reales detrás de la misma
+  interfaz `retrieve(texto, k)` — es una opción explícita, no el camino por
+  defecto, precisamente para no comprometer la reproducibilidad del
+  experimento académico.
+- **Vecino-más-cercano con margen como backend por defecto, LLM real como
+  opción, para el componente 3.** Un LLM real introduce una dependencia de
+  red/API (rompe la reproducibilidad offline por defecto) y, sin controles,
+  podría "alucinar" una cita. La regla determinista es más simple pero **su
   comportamiento es 100% explicable**: la cita siempre corresponde
-  exactamente al fragmento que ganó la decisión. El punto de extensión para
-  reemplazarla por un LLM real ya está aislado en `MinimalGenerator.suggest`.
+  exactamente al fragmento que ganó la decisión. `LLMBackedGenerator` (ver
+  "Backend LLM opcional") ofrece la alternativa con un LLM real, pero
+  reutiliza el mismo principio de seguridad: el modelo solo puede elegir una
+  cita de la lista de fragmentos que el `Retriever` ya recuperó, nunca
+  inventar un nivel directamente.
 - **Línea base de reglas totalmente separada del copiloto.** Si la línea base
   reutilizara el mismo `Retriever`, cualquier mejora en recuperación
   contaminaría también a la línea base, y H1/H2 dejarían de medir lo que
@@ -203,6 +209,93 @@ desde un hilo secundario.
 python gui.py
 ```
 
+## Backend LLM opcional (Gemini)
+
+Además del backend determinista (TF-IDF + vecino-más-cercano, por defecto, sin
+red), el prototipo soporta un segundo backend que usa **embeddings y
+generación reales de la API de Gemini**, para mayor robustez semántica ante
+relatos con vocabulario o redacción muy variada. Es estrictamente opcional:
+todo el resto del proyecto (incluida toda la evaluación de
+`run_experiment.py`) sigue funcionando sin él.
+
+### Cómo configurar tu propia API key (nunca la compartas ni la commitees)
+
+1. Consigue tu propia key en <https://aistudio.google.com/apikey>.
+2. Configúrala como variable de entorno **en tu sesión de terminal**, nunca
+   escrita en un archivo del repositorio:
+
+   ```powershell
+   # PowerShell (Windows)
+   $env:GEMINI_API_KEY = "tu-key-aqui"
+   ```
+
+   ```bash
+   # bash / zsh (Linux, macOS, Git Bash)
+   export GEMINI_API_KEY="tu-key-aqui"
+   ```
+
+3. Usa `--backend gemini` en `demo.py`, selecciona "gemini" en el
+   desplegable de `gui.py`, o pasa `backend="gemini"` a `CopilotoPipeline`.
+
+**Por qué nunca debe ir en el README ni en el código:** una key commiteada
+queda en el historial de git para siempre, incluso si luego se "borra" en un
+commit posterior — cualquiera con acceso al repositorio (o a una copia vieja)
+puede usarla a tu costa. Si alguna vez compartes una key por accidente (por
+chat, captura de pantalla, etc.), **revócala de inmediato** en Google AI
+Studio y genera una nueva. `.gitignore` ya excluye `.env` y el archivo de
+caché de embeddings por esta misma razón; `.env.example` documenta el nombre
+de la variable sin ningún valor real.
+
+### Qué cambia exactamente con este backend
+
+- **Recuperación:** `GeminiRetriever` (`src/retrieval.py`) reemplaza el
+  TF-IDF por el modelo `gemini-embedding-001`. Los embeddings del corpus se
+  cachean en `data/.gemini_embedding_cache.json` (excluido de git) para no
+  volver a pagar esa llamada en cada ejecución.
+- **Generación:** `LLMBackedGenerator` (`src/llm_generator.py`) reemplaza la
+  regla de vecino-más-cercano por una llamada a `gemini-flash-lite-latest`
+  con salida JSON forzada a un esquema fijo (`citation`, `abstain`,
+  `reasoning`).
+- **Seguridad, sin excepciones:** el modelo **solo puede elegir una cita de
+  la lista de fragmentos que el propio `Retriever` recuperó** — nunca se le
+  pide ni se le permite inventar un nivel directamente, y el nivel final
+  siempre se deriva de nuestra propia tabla `LEVEL_BY_CITATION`, nunca de un
+  campo de texto libre del modelo. Si el modelo devuelve una cita que no está
+  en la lista de candidatos, el sistema se abstiene (`tests/test_llm_generator.py`
+  prueba explícitamente este caso). Este es el mismo principio de "evidencia
+  y trazabilidad" del documento del proyecto, aplicado también al backend LLM.
+- **Robustez ante fallos de red:** si `GEMINI_API_KEY` no está configurada, o
+  la API falla incluso después de reintentos, `CopilotoPipeline` cae
+  automáticamente al backend determinista **para ese caso**, sin interrumpir
+  la ejecución; queda registrado en el registro de auditoría
+  (`"backend": "gemini_fallback_deterministic"`).
+
+### Comparación real: determinista vs. Gemini
+
+`experiments/compare_backends.py` corre ambos backends sobre las mismas 34
+viñetas de `data/cases.json` (resultado real en `results/backend_comparison.md`):
+
+```bash
+python -m experiments.compare_backends
+```
+
+| Métrica | Determinista | Gemini |
+|---|---|---|
+| Cobertura (no abstención) | 0.48 | 0.90 |
+| S (sub-triage ponderado) | 0.357 | 0.000 |
+| Sensibilidad I-II | 0.357 | 0.929 |
+| Recall@k | 0.552 | 0.862 |
+| Tasa de abstención indebida | 0.517 | 0.103 |
+
+Con solo 34 casos esto es ilustrativo, no una conclusión estadística — pero
+la dirección del resultado es consistente con lo esperado: los embeddings
+reales de Gemini generalizan mejor que TF-IDF ante frases que no comparten
+vocabulario literal con el corpus, y la comprensión de lenguaje natural del
+LLM resuelve mejor los casos ambiguos que la regla de vecino-más-cercano
+(incluyendo abstenerse correctamente en relatos genuinamente insuficientes,
+como los casos C031-C034). El costo es depender de una API externa: latencia
+de red, un costo por llamada, y la necesidad de manejar la key con cuidado.
+
 ## Estructura del repositorio
 
 ```
@@ -214,25 +307,30 @@ data/
   keyword_rules.json  Línea base de reglas (C0), congelada antes de evaluar
   external_triage_urgencias_colombia.csv  Dataset real de Datos Abiertos Colombia (ver abajo)
 src/
-  ingest.py       Parseo de ambos formatos de corpus a fragmentos citables
-  retrieval.py    Recuperación TF-IDF, modos 'generic' y 'clinical_es'
-  generator.py    Componente 3 mínimo: nivel + cita, o abstención
-  baseline.py     Línea base C0 (árbol de reglas, sin RAG)
-  metrics.py      S (sub-triage), kappa ponderado, recall@k, abstención
-  stats.py        Utilidades estadísticas genéricas (chi-cuadrado, tablas de contingencia)
-  audit.py        Registro de auditoría (JSON Lines)
-  pipeline.py     Orquesta un caso: recuperación -> generación -> auditoría
+  ingest.py        Parseo de ambos formatos de corpus a fragmentos citables
+  retrieval.py     Recuperación TF-IDF ('generic'/'clinical_es') + GeminiRetriever opcional
+  generator.py     Componente 3 mínimo: nivel + cita, o abstención (determinista)
+  llm_client.py    Cliente minimo de la API de Gemini (sin SDK, solo urllib)
+  llm_generator.py Componente 3, backend Gemini: nivel + cita validada, o abstención
+  baseline.py      Línea base C0 (árbol de reglas, sin RAG)
+  metrics.py       S (sub-triage), kappa ponderado, recall@k, abstención
+  stats.py         Utilidades estadísticas genéricas (chi-cuadrado, tablas de contingencia)
+  audit.py         Registro de auditoría (JSON Lines)
+  pipeline.py      Orquesta un caso: recuperación -> generación -> auditoría (ambos backends)
 experiments/
   run_experiment.py        Ejecuta las celdas E1-E4 + C0 sobre data/cases.json
   analyze_external_data.py Analiza el dataset real (distribución de niveles y tiempos)
+  compare_backends.py      Compara backend determinista vs. Gemini sobre data/cases.json
 results/
   summary.md                  Resultados en Markdown (generado por run_experiment.py)
   raw_results.json            Resultados en JSON (generado por run_experiment.py)
   audit_*.jsonl                Registro de auditoría por celda (generado por run_experiment.py)
   external_data_summary.md    Análisis del dataset real (generado por analyze_external_data.py)
-tests/            Pruebas unitarias de cada módulo (incluye tests/test_gui.py)
-demo.py           CLI de una sola consulta, para inspección manual
+  backend_comparison.md/json  Comparación real determinista vs. Gemini (generado por compare_backends.py)
+tests/            Pruebas unitarias de cada módulo (incluye GUI y llamadas a Gemini simuladas)
+demo.py           CLI de una sola consulta, para inspección manual (soporta --backend)
 gui.py            Interfaz gráfica de escritorio (Tkinter), ver "Interfaz gráfica"
+.env.example      Plantilla para configurar GEMINI_API_KEY (nunca poner la key real aquí)
 ```
 
 ## Fuentes de datos reales
@@ -372,11 +470,16 @@ levemente si se edita `data/cases.json` o los umbrales de `src/generator.py`):
   corrección clínica.
 - El corpus normativo es una reconstrucción sintética reducida, no el texto
   oficial completo de la Resolución 5596 ni de guías clínicas institucionales.
-- El componente de "embeddings clínicos en español" es un proxy determinista
-  (TF-IDF + léxico de dominio), no un modelo de embeddings real, por
-  restricciones del entorno de ejecución (sin acceso garantizado a internet).
-- La evaluación es 100% offline y por lotes; no mide latencia bajo
-  concurrencia ni incluye un despliegue en producción.
+- El backend **por defecto** de "embeddings clínicos en español" es un proxy
+  determinista (TF-IDF + léxico de dominio), no un modelo de embeddings real;
+  existe un backend opcional con embeddings y LLM reales de Gemini (ver
+  "Backend LLM opcional"), pero depende de una API externa, tiene costo por
+  llamada, y su evaluación (`compare_backends.py`) es tan ilustrativa como la
+  del diseño 2x2 (34 casos, no concluyente estadísticamente).
+- La evaluación central (`run_experiment.py`, diseño 2x2) es 100% offline y
+  por lotes; no mide latencia bajo concurrencia ni incluye un despliegue en
+  producción. El backend Gemini sí depende de red, pero sigue evaluándose
+  por lotes, no como servicio desplegado.
 - El dataset externo real (`data/external_triage_urgencias_colombia.csv`) es
   administrativo y de una sola red de IPS reportante: no contiene relato de
   paciente, no es necesariamente representativo de todo el país, y no se usa
@@ -385,22 +488,26 @@ levemente si se edita `data/cases.json` o los umbrales de `src/generator.py`):
 
 ## Extensión a un despliegue real
 
-Puntos de extensión ya previstos en el código, sin necesidad de rediseñar el
-pipeline:
+**Ya implementado** (ver "Backend LLM opcional"): el reemplazo de TF-IDF por
+embeddings reales (`GeminiRetriever`) y de la regla determinista por un LLM
+real (`LLMBackedGenerator`), ambos detrás de un backend opcional que no
+rompe el camino determinista por defecto. Puntos de extensión que quedan
+pendientes:
 
-- Reemplazar `Retriever` (modo `clinical_es`) por un modelo de embeddings
-  real vía una librería como `sentence-transformers`, manteniendo la misma
-  interfaz `retrieve(texto, k)`.
-- Reemplazar la regla determinista de `MinimalGenerator` por una llamada a un
-  modelo de lenguaje vía API, manteniendo el contrato de salida (`Suggestion`:
-  nivel, cita, confianza, abstención).
+- Entrenar/usar un modelo de embeddings clínicos en español fijo y propio
+  (p. ej. sobre ClinText-SP o CoWeSe, ver "Fuentes de datos reales") en vez
+  de depender de la API de un proveedor externo — reduciría costo y
+  dependencia de red, a cambio de mantenimiento propio del modelo.
 - Ampliar `data/cases.json` a 60-100 casos con doble ciego real por
   evaluadores clínicos externos, siguiendo el esquema ya definido en cada
-  registro (`evaluator1`, `evaluator2`, `resolution_method`, etc.).
-- Entrenar un modelo real de embeddings clínicos en español sobre corpus como
-  ClinText-SP o CoWeSe (ver "Fuentes de datos reales"), y validar la
-  generalización de la arquitectura con MIMIC-IV-ED (en inglés) antes de
-  intentarlo en español.
+  registro (`evaluator1`, `evaluator2`, `resolution_method`, etc.) — sigue
+  siendo la brecha más importante para pasar de "prototipo funcional" a
+  "evidencia de seguridad clínica real" (ver "Limitaciones").
+- Validar la generalización de la arquitectura con MIMIC-IV-ED (en inglés)
+  antes de intentar una validación clínica formal en español.
+- Si se despliega el backend Gemini en producción: mover la API key a un
+  gestor de secretos (no una variable de entorno de shell) y agregar límites
+  de tasa/costo por IPS o por usuario.
 
 ## Licencia
 

@@ -2,3 +2,14 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .venv/
+
+# Nunca commitear API keys: usar variables de entorno (ver README.md,
+# seccion "Backend LLM opcional") o un archivo .env local (basado en
+# .env.example) que este archivo excluye a proposito.
+.env
+.env.*
+!.env.example
+
+# Cache de embeddings de Gemini: se regenera automaticamente y no debe
+# versionarse (puede crecer y no aporta nada fuera de esta maquina).
+data/.gemini_embedding_cache.json

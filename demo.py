@@ -6,6 +6,7 @@ interfaz minima de revision descrita en el documento del proyecto.
 Uso:
     python demo.py "el paciente tiene dolor en el pecho y sudoracion fria"
     python demo.py "el paciente tiene dolor en el pecho" --corpus raw --embeddings generic
+    python demo.py "el paciente tiene dolor en el pecho" --backend gemini  # requiere GEMINI_API_KEY
 """
 from __future__ import annotations
 
@@ -25,7 +26,12 @@ def main() -> None:
     )
     parser.add_argument(
         "--embeddings", choices=["generic", "clinical_es"], default="clinical_es",
-        help="Modo de vectorizacion (por defecto: clinical_es).",
+        help="Modo de vectorizacion (por defecto: clinical_es). Ignorado si --backend gemini.",
+    )
+    parser.add_argument(
+        "--backend", choices=["deterministic", "gemini"], default="deterministic",
+        help="'deterministic' (por defecto, sin red) o 'gemini' (embeddings + LLM reales, "
+        "requiere la variable de entorno GEMINI_API_KEY; ver README.md).",
     )
     args = parser.parse_args()
 
@@ -34,13 +40,15 @@ def main() -> None:
     except AttributeError:
         pass
 
-    pipeline = CopilotoPipeline(corpus_format=args.corpus, embedding_mode=args.embeddings)
+    pipeline = CopilotoPipeline(
+        corpus_format=args.corpus, embedding_mode=args.embeddings, backend=args.backend
+    )
     suggestion = pipeline.run_case("demo", args.texto)
 
     baseline = RuleBasedBaseline().classify(args.texto)
 
     print(f"Relato: {args.texto}")
-    print(f"Corpus={args.corpus} | Embeddings={args.embeddings}")
+    print(f"Corpus={args.corpus} | Embeddings={args.embeddings} | Backend={args.backend}")
     print("-" * 60)
     if suggestion.abstained:
         print(f"Copiloto: SE ABSTIENE (razon: {suggestion.reason})")

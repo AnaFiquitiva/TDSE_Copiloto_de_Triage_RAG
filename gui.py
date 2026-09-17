@@ -95,18 +95,29 @@ class ConsultaTab(ttk.Frame):
             state="readonly", width=15,
         ).grid(row=2, column=3, sticky="w")
 
+        ttk.Label(self, text="Backend:").grid(row=3, column=0, sticky="e")
+        self.backend_var = tk.StringVar(value="deterministic")
+        ttk.Combobox(
+            self, textvariable=self.backend_var, values=["deterministic", "gemini"],
+            state="readonly", width=15,
+        ).grid(row=3, column=1, sticky="w")
+        ttk.Label(
+            self, text="'gemini' requiere GEMINI_API_KEY (ver README); si falla, cae a 'deterministic'.",
+            foreground="#555555", font=("TkDefaultFont", 8),
+        ).grid(row=3, column=2, columnspan=2, sticky="w")
+
         self.boton = ttk.Button(self, text="Obtener sugerencia", command=self._on_click)
-        self.boton.grid(row=3, column=0, columnspan=4, pady=8)
+        self.boton.grid(row=4, column=0, columnspan=4, pady=8)
 
         self.salida = tk.Text(self, height=22, width=100, wrap="word", state="disabled")
-        self.salida.grid(row=4, column=0, columnspan=4, sticky="nsew")
+        self.salida.grid(row=5, column=0, columnspan=4, sticky="nsew")
 
         ttk.Label(self, text=DISCLAIMER, foreground="#8a1f1f", wraplength=760).grid(
-            row=5, column=0, columnspan=4, sticky="w", pady=(8, 0)
+            row=6, column=0, columnspan=4, sticky="w", pady=(8, 0)
         )
 
         self.columnconfigure(0, weight=1)
-        self.rowconfigure(4, weight=1)
+        self.rowconfigure(5, weight=1)
 
     def _write(self, text: str) -> None:
         self.salida.configure(state="normal")
@@ -121,22 +132,48 @@ class ConsultaTab(ttk.Frame):
             return
         corpus_format = self.corpus_var.get()
         embedding_mode = self.embed_var.get()
+        backend = self.backend_var.get()
         self.boton.configure(state="disabled")
-        self._write("Procesando...")
+        self._write("Procesando..." if backend == "deterministic" else "Procesando (llamando a Gemini)...")
 
         def compute():
-            pipeline = CopilotoPipeline(corpus_format=corpus_format, embedding_mode=embedding_mode)
-            suggestion = pipeline.run_case("gui", relato)
+            import os
+            import tempfile
+
+            fd, tmp_name = tempfile.mkstemp(suffix=".jsonl")
+            os.close(fd)
+            audit_path = Path(tmp_name)
+            try:
+                pipeline = CopilotoPipeline(
+                    corpus_format=corpus_format,
+                    embedding_mode=embedding_mode,
+                    backend=backend,
+                    audit_path=audit_path,
+                )
+                suggestion = pipeline.run_case("gui", relato)
+                backend_used = pipeline.audit_log.read_all()[-1]["backend"]
+            finally:
+                audit_path.unlink(missing_ok=True)
             baseline_result = self.baseline.classify(relato)
-            return suggestion, baseline_result
+            return suggestion, baseline_result, backend_used
 
         def done(result):
             self.boton.configure(state="normal")
             if isinstance(result, Exception):
                 self._write(f"Error: {result}")
                 return
-            suggestion, baseline_result = result
-            lines = [f"Relato: {relato}", f"Corpus={corpus_format} | Embeddings={embedding_mode}", "-" * 70]
+            suggestion, baseline_result, backend_used = result
+            lines = [
+                f"Relato: {relato}",
+                f"Corpus={corpus_format} | Embeddings={embedding_mode} | Backend solicitado={backend} "
+                f"| Backend usado={backend_used}",
+                "-" * 70,
+            ]
+            if backend_used == "gemini_fallback_deterministic":
+                lines.append(
+                    "[Aviso: se pidió el backend 'gemini' pero no está disponible (revise "
+                    "GEMINI_API_KEY o la conexión); se usó el backend determinista.]"
+                )
             if suggestion.abstained:
                 lines.append(f"Copiloto: SE ABSTIENE (razón: {suggestion.reason})")
             else:
