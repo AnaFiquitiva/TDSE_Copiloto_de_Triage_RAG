@@ -2,27 +2,28 @@
   "deterministic": {
     "backend_solicitado": "deterministic",
     "backend_realmente_usado": {
-      "deterministic": 34
+      "deterministic": 48
     },
-    "n_eligible_cases": 29,
-    "cobertura": 0.4827586206896552,
-    "S_sub_triage": 0.35714285714285715,
-    "sensibilidad_I_II": 0.35714285714285715,
-    "recall_at_k": 0.5517241379310345,
+    "n_eligible_cases": 43,
+    "cobertura": 0.5581395348837209,
+    "S_sub_triage": 0.08333333333333333,
+    "sensibilidad_I_II": 0.47619047619047616,
+    "recall_at_k": 0.5813953488372093,
     "tasa_abstencion_correcta": 0.75,
-    "tasa_abstencion_indebida": 0.5172413793103449
+    "tasa_abstencion_indebida": 0.4418604651162791
   },
   "gemini": {
     "backend_solicitado": "gemini",
     "backend_realmente_usado": {
-      "gemini": 34
+      "gemini": 46,
+      "gemini_fallback_deterministic": 2
     },
-    "n_eligible_cases": 29,
-    "cobertura": 0.9655172413793104,
+    "n_eligible_cases": 43,
+    "cobertura": 0.9302325581395349,
     "S_sub_triage": 0.0,
-    "sensibilidad_I_II": 1.0,
-    "recall_at_k": 0.9655172413793104,
+    "sensibilidad_I_II": 0.8571428571428571,
+    "recall_at_k": 0.8837209302325582,
     "tasa_abstencion_correcta": 1.0,
-    "tasa_abstencion_indebida": 0.034482758620689655
+    "tasa_abstencion_indebida": 0.06976744186046512
   }
 }

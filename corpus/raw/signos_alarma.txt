@@ -12,5 +12,19 @@ Flujograma ideacion suicida rama plan estructurado -> hay plan estructurado y me
 Flujograma ideacion suicida rama pasiva -> ideacion pasiva sin plan estructurado ni medios disponibles => N3
 Flujograma sangrado rama alarma -> hemorragia que no cede con presion directa o signos de shock => N1
 Flujograma sangrado rama sin alarma -> sangrado leve controlado que cede con presion directa => N4
+Flujograma dolor abdominal rama alarma -> abdomen en tabla, dolor a la descompresion o signos de shock asociados => N1
+Flujograma dolor abdominal rama sin alarma -> dolor abdominal leve, tolera via oral, sin rigidez ni shock => N4
+Flujograma convulsion rama alarma -> convulsion activa de mas de 5 minutos o sin recuperar conciencia entre episodios => N1
+Flujograma convulsion rama sin alarma -> convulsion que ya cedio, paciente alerta y orientado => N3
+Flujograma cefalea rama alarma -> cefalea subita la peor de la vida con signos neurologicos focales o rigidez de nuca => N1
+Flujograma cefalea rama sin alarma -> cefalea habitual tipo tensional sin signos neurologicos => N4
+Flujograma quemadura rama alarma -> quemadura extensa en cara cuello o via aerea o con dificultad respiratoria => N1
+Flujograma quemadura rama sin alarma -> quemadura superficial y pequena sin compromiso de via aerea => N4
+Flujograma alergia rama alarma -> hinchazon de labios lengua o garganta dificultad respiratoria o signos de shock => N1
+Flujograma alergia rama sin alarma -> urticaria leve o localizada sin dificultad respiratoria ni hinchazon facial => N4
+Flujograma intoxicacion rama alarma -> alteracion del estado de conciencia dificultad respiratoria o sustancia potencialmente letal => N1
+Flujograma intoxicacion rama sin alarma -> sintomas leves paciente alerta y orientado sustancia de bajo riesgo => N3
+Flujograma gestante rama alarma -> sangrado vaginal abundante en el embarazo dolor abdominal intenso con sangrado o convulsiones en gestante => N1
+Flujograma gestante rama sin alarma -> control prenatal de rutina sin sangrado dolor ni otros sintomas => N5
 
 NOTA (equipo): flujograma reconstruido de forma sintetica por el equipo del proyecto a partir de guias clinicas generales de urgencias, unicamente para efectos de prueba del pipeline; no reemplaza protocolos institucionales oficiales.

@@ -1,5 +1,5 @@
 """Ejecuta el diseño experimental 2x2 (E1-E4) más la línea base C0 descrito
-en la Sección 5 del documento del proyecto, sobre el conjunto de 34 vinetas
+en la Sección 5 del documento del proyecto, sobre el conjunto de viñetas
 de ``data/cases.json``, y escribe los resultados en ``results/``.
 
 Uso:
@@ -147,13 +147,13 @@ def run_baseline(cases: list[dict]) -> dict:
     }
 
 
-def format_markdown(kappa: dict, baseline: dict, cells: list[dict]) -> str:
+def format_markdown(kappa: dict, baseline: dict, cells: list[dict], n_total_cases: int) -> str:
     lines = [
         "# Resultados del diseño experimental 2x2 + línea base (C0)",
         "",
         "Generado automáticamente por `experiments/run_experiment.py`. Estas cifras son "
-        "el resultado de ejecutar el pipeline sobre las 34 viñetas sintéticas de "
-        "`data/cases.json` (versión reducida e ilustrativa del protocolo de 60-100 casos "
+        f"el resultado de ejecutar el pipeline sobre las {n_total_cases} viñetas sintéticas "
+        "de `data/cases.json` (versión reducida e ilustrativa del protocolo de 60-100 casos "
         "descrito en el documento del proyecto); no constituyen una validación clínica "
         "externa (ver `README.md`, sección de limitaciones).",
         "",
@@ -214,7 +214,7 @@ def main() -> None:
         json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8"
     )
 
-    summary_md = format_markdown(kappa, baseline, cells)
+    summary_md = format_markdown(kappa, baseline, cells, n_total_cases=len(cases))
     (RESULTS_DIR / "summary.md").write_text(summary_md, encoding="utf-8")
 
     print(summary_md)

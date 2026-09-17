@@ -1,5 +1,5 @@
 {
-  "_nota": "Conjunto de 34 vinetas sinteticas construidas por el equipo del proyecto siguiendo el protocolo de la Seccion 5 del documento: cada nivel de referencia se deriva de un criterio explicito y citable de la normativa incluida en corpus/, dos evaluadores lo asignan de forma independiente y ciega, y las discrepancias se resuelven segun el protocolo fijo documentado en README.md. Es una version reducida e ilustrativa del protocolo de 60-100 casos descrito en el documento (Seccion 5), suficiente para ejercitar el pipeline y la maquinaria de metricas de extremo a extremo; NO constituye una validacion clinica externa (ver limitaciones en README.md).",
+  "_nota": "Conjunto de 48 vinetas sinteticas construidas por el equipo del proyecto siguiendo el protocolo de la Seccion 5 del documento: cada nivel de referencia se deriva de un criterio explicito y citable de la normativa incluida en corpus/, dos evaluadores lo asignan de forma independiente y ciega, y las discrepancias se resuelven segun el protocolo fijo documentado en README.md. Los casos C035-C048 se agregaron al ampliar el corpus normativo con 7 motivos de consulta nuevos (dolor abdominal, convulsion, cefalea, quemadura, alergia, intoxicacion, urgencia obstetrica). Sigue siendo una version reducida e ilustrativa del protocolo de 60-100 casos descrito en el documento (Seccion 5), suficiente para ejercitar el pipeline y la maquinaria de metricas de extremo a extremo; NO constituye una validacion clinica externa (ver limitaciones en README.md).",
   "cases": [
     {
       "case_id": "C001",
@@ -515,6 +515,161 @@
       "resolution_method": "acuerdo_inicial",
       "final_level": 5,
       "final_citation": "RES5596-N5",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C035",
+      "text": "Tiene un dolor abdominal muy fuerte, la barriga esta dura como una tabla y se queja mucho cuando le presionan y sueltan de golpe; ademas esta muy palido y con el pulso acelerado.",
+      "evaluator1": {"level": 1, "citation": "ALARMA-ABDOMEN-GRAVE"},
+      "evaluator2": {"level": 1, "citation": "ALARMA-ABDOMEN-GRAVE"},
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 1,
+      "final_citation": "ALARMA-ABDOMEN-GRAVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C036",
+      "text": "Tiene un dolor leve en la barriga desde ayer, ha podido comer y tomar liquidos sin problema, y no tiene fiebre ni vomito.",
+      "evaluator1": {"level": 4, "citation": "ALARMA-ABDOMEN-LEVE"},
+      "evaluator2": {"level": 4, "citation": "ALARMA-ABDOMEN-LEVE"},
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 4,
+      "final_citation": "ALARMA-ABDOMEN-LEVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C037",
+      "text": "Lleva mas de cinco minutos convulsionando sin parar y no ha recuperado el conocimiento entre los episodios.",
+      "evaluator1": {"level": 1, "citation": "ALARMA-CONVULSION-GRAVE"},
+      "evaluator2": {"level": 1, "citation": "ALARMA-CONVULSION-GRAVE"},
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 1,
+      "final_citation": "ALARMA-CONVULSION-GRAVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C038",
+      "text": "Tuvo una convulsion que ya paso, ahora esta despierto, hablando bien y es la primera vez que le pasa algo asi.",
+      "evaluator1": {"level": 3, "citation": "ALARMA-CONVULSION-LEVE"},
+      "evaluator2": {"level": 3, "citation": "ALARMA-CONVULSION-LEVE"},
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 3,
+      "final_citation": "ALARMA-CONVULSION-LEVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C039",
+      "text": "Tiene un dolor de cabeza subito, dice que es el peor de toda su vida, con el cuello muy rigido y se le dificulta hablar bien.",
+      "evaluator1": {"level": 1, "citation": "ALARMA-CEFALEA-GRAVE"},
+      "evaluator2": {"level": 1, "citation": "ALARMA-CEFALEA-GRAVE"},
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 1,
+      "final_citation": "ALARMA-CEFALEA-GRAVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C040",
+      "text": "Tiene un dolor de cabeza leve, parecido al que le da siempre por el estres, sin nauseas ni ningun otro sintoma.",
+      "evaluator1": {"level": 4, "citation": "ALARMA-CEFALEA-LEVE"},
+      "evaluator2": {"level": 4, "citation": "ALARMA-CEFALEA-LEVE"},
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 4,
+      "final_citation": "ALARMA-CEFALEA-LEVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C041",
+      "text": "Se quemo la cara y el cuello con agua hirviendo, tiene la piel muy afectada y le esta costando respirar.",
+      "evaluator1": {"level": 1, "citation": "ALARMA-QUEMADURA-GRAVE"},
+      "evaluator2": {"level": 1, "citation": "ALARMA-QUEMADURA-GRAVE"},
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 1,
+      "final_citation": "ALARMA-QUEMADURA-GRAVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C042",
+      "text": "Se quemo un poco la mano con la plancha, es una quemadura pequena y superficial en la punta de dos dedos.",
+      "evaluator1": {"level": 4, "citation": "ALARMA-QUEMADURA-LEVE"},
+      "evaluator2": {"level": 4, "citation": "ALARMA-QUEMADURA-LEVE"},
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 4,
+      "final_citation": "ALARMA-QUEMADURA-LEVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C043",
+      "text": "Comio mariscos y ahora tiene la lengua y los labios muy hinchados, le cuesta respirar y siente que se le cierra la garganta.",
+      "evaluator1": {"level": 1, "citation": "ALARMA-ALERGIA-GRAVE"},
+      "evaluator2": {"level": 1, "citation": "ALARMA-ALERGIA-GRAVE"},
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 1,
+      "final_citation": "ALARMA-ALERGIA-GRAVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C044",
+      "text": "Le salio urticaria en un brazo despues de comer algo, le pica un poco pero respira normal y no tiene la cara hinchada.",
+      "evaluator1": {"level": 4, "citation": "ALARMA-ALERGIA-LEVE"},
+      "evaluator2": {"level": 4, "citation": "ALARMA-ALERGIA-LEVE"},
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 4,
+      "final_citation": "ALARMA-ALERGIA-LEVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C045",
+      "text": "Se tomo varias pastillas que no debia, ahora esta muy confundido y le cuesta mantenerse despierto.",
+      "evaluator1": {"level": 1, "citation": "ALARMA-INTOXICACION-GRAVE"},
+      "evaluator2": {"level": 2, "citation": "ALARMA-INTOXICACION-GRAVE"},
+      "resolution_method": "consenso_tras_discusion",
+      "final_level": 1,
+      "final_citation": "ALARMA-INTOXICACION-GRAVE",
+      "ambiguous": false,
+      "should_abstain": false,
+      "nota_resolucion": "Evaluador 2 acepto que la alteracion del estado de conciencia descrita (confusion marcada y dificultad para mantenerse despierto) corresponde al criterio de alarma explicito, no a un nivel intermedio."
+    },
+    {
+      "case_id": "C046",
+      "text": "Tomo mas licor de lo normal anoche, hoy esta con nauseas leves pero completamente alerta y orientado.",
+      "evaluator1": {"level": 3, "citation": "ALARMA-INTOXICACION-LEVE"},
+      "evaluator2": {"level": 3, "citation": "ALARMA-INTOXICACION-LEVE"},
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 3,
+      "final_citation": "ALARMA-INTOXICACION-LEVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C047",
+      "text": "Esta embarazada de siete meses y empezo a sangrar bastante por la vagina, ademas tiene un dolor fuerte en la barriga.",
+      "evaluator1": {"level": 1, "citation": "ALARMA-GESTANTE-GRAVE"},
+      "evaluator2": {"level": 1, "citation": "ALARMA-GESTANTE-GRAVE"},
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 1,
+      "final_citation": "ALARMA-GESTANTE-GRAVE",
+      "ambiguous": false,
+      "should_abstain": false
+    },
+    {
+      "case_id": "C048",
+      "text": "Viene a su control prenatal de rutina, esta embarazada de cinco meses y no tiene ninguna molestia.",
+      "evaluator1": {"level": 5, "citation": "ALARMA-GESTANTE-LEVE"},
+      "evaluator2": {"level": 5, "citation": "ALARMA-GESTANTE-LEVE"},
+      "resolution_method": "acuerdo_inicial",
+      "final_level": 5,
+      "final_citation": "ALARMA-GESTANTE-LEVE",
       "ambiguous": false,
       "should_abstain": false
     },

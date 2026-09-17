@@ -1,6 +1,6 @@
 """Compara el backend determinista (TF-IDF + vecino-más-cercano, sin red) contra
 el backend Gemini (embeddings + generación reales, requiere `GEMINI_API_KEY`)
-sobre las mismas 34 viñetas de `data/cases.json`, usando siempre el corpus
+sobre las mismas viñetas de `data/cases.json`, usando siempre el corpus
 reformateado (para aislar el efecto del backend del efecto del formato del
 corpus, que ya se evalúa por separado en `run_experiment.py`).
 
@@ -104,12 +104,12 @@ def evaluate_backend(backend: str, cases: list[dict]) -> dict:
     }
 
 
-def format_markdown(det: dict, gem: dict) -> str:
+def format_markdown(det: dict, gem: dict, n_total_cases: int) -> str:
     lines = [
         "# Comparación de backends: determinista vs. Gemini",
         "",
-        "Generado por `experiments/compare_backends.py` sobre las mismas 34 viñetas "
-        f"de `data/cases.json`, ambas con corpus `{CORPUS_FORMAT}`, para aislar el "
+        f"Generado por `experiments/compare_backends.py` sobre las mismas {n_total_cases} "
+        f"viñetas de `data/cases.json`, ambas con corpus `{CORPUS_FORMAT}`, para aislar el "
         "efecto del backend de generación/recuperación.",
         "",
         f"Backend Gemini realmente usado por caso: {gem['backend_realmente_usado']} "
@@ -129,7 +129,7 @@ def format_markdown(det: dict, gem: dict) -> str:
         f"| Tasa de abstención indebida | {det['tasa_abstencion_indebida']:.3f} | "
         f"{gem['tasa_abstencion_indebida']:.3f} |",
         "",
-        "Con solo 34 casos esta comparación es ilustrativa, no concluyente "
+        f"Con solo {n_total_cases} casos esta comparación es ilustrativa, no concluyente "
         "estadísticamente (igual que en `run_experiment.py`); su valor es mostrar "
         "que el backend Gemini es un reemplazo funcional del determinista bajo la "
         "misma interfaz y las mismas métricas, no declarar un ganador definitivo.",
@@ -146,7 +146,7 @@ def main() -> None:
     print("Evaluando backend Gemini (esto llama a la API real, puede tardar)...")
     gem = evaluate_backend("gemini", cases)
 
-    summary = format_markdown(det, gem)
+    summary = format_markdown(det, gem, n_total_cases=len(cases))
     (RESULTS_DIR / "backend_comparison.md").write_text(summary, encoding="utf-8")
     (RESULTS_DIR / "backend_comparison.json").write_text(
         json.dumps({"deterministic": det, "gemini": gem}, indent=2, ensure_ascii=False),

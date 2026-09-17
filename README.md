@@ -154,7 +154,7 @@ servicios pagos, evaluado offline) y no a preferencia arbitraria:
   triage y de señales de alarma usada en el sistema colombiano y en escalas
   internacionales comparables. **No es una transcripción literal ni oficial**
   de la Resolución 5596 de 2015 ni de ninguna guía clínica institucional.
-- El conjunto de 34 viñetas de `data/cases.json` es sintético y fue etiquetado
+- El conjunto de 48 viñetas de `data/cases.json` es sintético y fue etiquetado
   por el propio equipo (sin evaluadores clínicos externos). Es una versión
   reducida e ilustrativa del protocolo de 60-100 casos con doble ciego descrito
   en el documento del proyecto: sirve para ejercitar el pipeline y la
@@ -279,7 +279,7 @@ de la variable sin ningún valor real.
 
 ### Comparación real: determinista vs. Gemini
 
-`experiments/compare_backends.py` corre ambos backends sobre las mismas 34
+`experiments/compare_backends.py` corre ambos backends sobre las mismas 48
 viñetas de `data/cases.json` (resultado real en `results/backend_comparison.md`):
 
 ```bash
@@ -288,13 +288,13 @@ python -m experiments.compare_backends
 
 | Métrica | Determinista | Gemini |
 |---|---|---|
-| Cobertura (no abstención) | 0.48 | 0.97 |
-| S (sub-triage ponderado) | 0.357 | 0.000 |
-| Sensibilidad I-II | 0.357 | 1.000 |
-| Recall@k | 0.552 | 0.966 |
-| Tasa de abstención indebida | 0.517 | 0.034 |
+| Cobertura (no abstención) | 0.56 | 0.93 |
+| S (sub-triage ponderado) | 0.083 | 0.000 |
+| Sensibilidad I-II | 0.476 | 0.857 |
+| Recall@k | 0.581 | 0.884 |
+| Tasa de abstención indebida | 0.442 | 0.070 |
 
-Con solo 34 casos esto es ilustrativo, no una conclusión estadística — pero
+Con solo 48 casos esto es ilustrativo, no una conclusión estadística — pero
 la dirección del resultado es consistente con lo esperado: los embeddings
 reales de Gemini (con codificación asimétrica consulta/documento) generalizan
 mucho mejor que TF-IDF ante frases que no comparten vocabulario literal con
@@ -310,8 +310,9 @@ costo por llamada, y la necesidad de manejar la key con cuidado.
 corpus/
   raw/            Guías en formato crudo (tablas y flujogramas sin reformatear)
   reformatted/    Las mismas guías, reformateadas a texto estructurado con citas
+                  (31 fragmentos: 5 niveles + 13 motivos de consulta x 2 ramas)
 data/
-  cases.json      34 viñetas sintéticas con gold standard intra-equipo
+  cases.json      48 viñetas sintéticas con gold standard intra-equipo
   keyword_rules.json  Línea base de reglas (C0), congelada antes de evaluar
   external_triage_urgencias_colombia.csv  Dataset real de Datos Abiertos Colombia (ver abajo)
 src/
@@ -457,19 +458,20 @@ Las fórmulas completas están documentadas como docstrings en `src/metrics.py`.
 ## Resultados
 
 `results/summary.md` y `results/raw_results.json` contienen la salida real de
-`python -m experiments.run_experiment` sobre las 34 viñetas de este
+`python -m experiments.run_experiment` sobre las 48 viñetas de este
 repositorio. Un extracto representativo (los números exactos pueden variar
 levemente si se edita `data/cases.json` o los umbrales de `src/generator.py`):
 
-- Con solo 34 casos, ninguna diferencia entre celdas es estadísticamente
+- Con solo 48 casos, ninguna diferencia entre celdas es estadísticamente
   concluyente; el valor de este resultado es mostrar que el pipeline y las
   métricas funcionan de extremo a extremo, no establecer cuál celda "gana".
 - El sistema se abstiene en una fracción considerable de los casos elegibles:
-  es una consecuencia esperada de un corpus deliberadamente pequeño (13
-  fragmentos) y un umbral de margen conservador, no un error del pipeline. Un
-  corpus más completo (60-100 casos y más fragmentos normativos, como plantea
-  el documento del proyecto) reduciría la tasa de abstención sin relajar el
-  umbral de seguridad.
+  es una consecuencia esperada de un corpus todavía acotado (31 fragmentos,
+  ampliado desde los 17 iniciales — ver "Fuentes de datos reales" y el
+  historial de commits) y un umbral de margen conservador, no un error del
+  pipeline. Un corpus aún más completo (60-100 casos y más motivos de
+  consulta, como plantea el documento del proyecto) seguiría reduciendo la
+  tasa de abstención sin relajar el umbral de seguridad.
 
 ## Limitaciones (heredadas del documento del proyecto)
 
@@ -483,7 +485,7 @@ levemente si se edita `data/cases.json` o los umbrales de `src/generator.py`):
   existe un backend opcional con embeddings y LLM reales de Gemini (ver
   "Backend LLM opcional"), pero depende de una API externa, tiene costo por
   llamada, y su evaluación (`compare_backends.py`) es tan ilustrativa como la
-  del diseño 2x2 (34 casos, no concluyente estadísticamente).
+  del diseño 2x2 (48 casos, no concluyente estadísticamente).
 - La evaluación central (`run_experiment.py`, diseño 2x2) es 100% offline y
   por lotes; no mide latencia bajo concurrencia ni incluye un despliegue en
   producción. El backend Gemini sí depende de red, pero sigue evaluándose
