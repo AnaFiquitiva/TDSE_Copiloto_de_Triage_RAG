@@ -137,63 +137,71 @@ class ConsultaTab(ttk.Frame):
         self._write("Procesando..." if backend == "deterministic" else "Procesando (llamando a Gemini)...")
 
         def compute():
-            import os
-            import tempfile
-
-            fd, tmp_name = tempfile.mkstemp(suffix=".jsonl")
-            os.close(fd)
-            audit_path = Path(tmp_name)
-            try:
-                pipeline = CopilotoPipeline(
-                    corpus_format=corpus_format,
-                    embedding_mode=embedding_mode,
-                    backend=backend,
-                    audit_path=audit_path,
-                )
-                suggestion = pipeline.run_case("gui", relato)
-                backend_used = pipeline.audit_log.read_all()[-1]["backend"]
-            finally:
-                audit_path.unlink(missing_ok=True)
-            baseline_result = self.baseline.classify(relato)
-            return suggestion, baseline_result, backend_used
+            return self._compute(relato, corpus_format, embedding_mode, backend)
 
         def done(result):
-            self.boton.configure(state="normal")
-            if isinstance(result, Exception):
-                self._write(f"Error: {result}")
-                return
-            suggestion, baseline_result, backend_used = result
-            lines = [
-                f"Relato: {relato}",
-                f"Corpus={corpus_format} | Embeddings={embedding_mode} | Backend solicitado={backend} "
-                f"| Backend usado={backend_used}",
-                "-" * 70,
-            ]
-            if backend_used == "gemini_fallback_deterministic":
-                lines.append(
-                    "[Aviso: se pidió el backend 'gemini' pero no está disponible (revise "
-                    "GEMINI_API_KEY o la conexión); se usó el backend determinista.]"
-                )
-            if suggestion.abstained:
-                lines.append(f"Copiloto: SE ABSTIENE (razón: {suggestion.reason})")
-            else:
-                lines.append(
-                    f"Copiloto: Nivel {suggestion.level} | Cita: {suggestion.citation} "
-                    f"| Confianza: {suggestion.confidence:.2f}"
-                )
-            lines.append("")
-            lines.append("Fragmentos recuperados:")
-            for rc in suggestion.retrieved:
-                snippet = rc.chunk.text.replace("\n", " ")[:100]
-                lines.append(f"  - {rc.chunk.chunk_id} (score={rc.score:.3f}): {snippet!r}")
-            lines.append("-" * 70)
-            lines.append(
-                f"Línea base (reglas): Nivel {baseline_result.level} | "
-                f"Cita: {baseline_result.citation} | Palabra clave: {baseline_result.matched_keyword}"
-            )
-            self._write("\n".join(lines))
+            self._on_result(result, relato, corpus_format, embedding_mode, backend)
 
         _run_in_background(self, compute, done)
+
+    def _compute(self, relato: str, corpus_format: str, embedding_mode: str, backend: str):
+        """Lógica pura (sin Tkinter) de una consulta: separada de `_on_click`
+        para poder probarla directamente, sin hilos ni mainloop."""
+        import os
+        import tempfile
+
+        fd, tmp_name = tempfile.mkstemp(suffix=".jsonl")
+        os.close(fd)
+        audit_path = Path(tmp_name)
+        try:
+            pipeline = CopilotoPipeline(
+                corpus_format=corpus_format,
+                embedding_mode=embedding_mode,
+                backend=backend,
+                audit_path=audit_path,
+            )
+            suggestion = pipeline.run_case("gui", relato)
+            backend_used = pipeline.audit_log.read_all()[-1]["backend"]
+        finally:
+            audit_path.unlink(missing_ok=True)
+        baseline_result = self.baseline.classify(relato)
+        return suggestion, baseline_result, backend_used
+
+    def _on_result(self, result, relato: str, corpus_format: str, embedding_mode: str, backend: str) -> None:
+        self.boton.configure(state="normal")
+        if isinstance(result, Exception):
+            self._write(f"Error: {result}")
+            return
+        suggestion, baseline_result, backend_used = result
+        lines = [
+            f"Relato: {relato}",
+            f"Corpus={corpus_format} | Embeddings={embedding_mode} | Backend solicitado={backend} "
+            f"| Backend usado={backend_used}",
+            "-" * 70,
+        ]
+        if backend_used == "gemini_fallback_deterministic":
+            lines.append(
+                "[Aviso: se pidió el backend 'gemini' pero no está disponible (revise "
+                "GEMINI_API_KEY o la conexión); se usó el backend determinista.]"
+            )
+        if suggestion.abstained:
+            lines.append(f"Copiloto: SE ABSTIENE (razón: {suggestion.reason})")
+        else:
+            lines.append(
+                f"Copiloto: Nivel {suggestion.level} | Cita: {suggestion.citation} "
+                f"| Confianza: {suggestion.confidence:.2f}"
+            )
+        lines.append("")
+        lines.append("Fragmentos recuperados:")
+        for rc in suggestion.retrieved:
+            snippet = rc.chunk.text.replace("\n", " ")[:100]
+            lines.append(f"  - {rc.chunk.chunk_id} (score={rc.score:.3f}): {snippet!r}")
+        lines.append("-" * 70)
+        lines.append(
+            f"Línea base (reglas): Nivel {baseline_result.level} | "
+            f"Cita: {baseline_result.citation} | Palabra clave: {baseline_result.matched_keyword}"
+        )
+        self._write("\n".join(lines))
 
 
 class ExperimentoTab(ttk.Frame):
@@ -226,25 +234,27 @@ class ExperimentoTab(ttk.Frame):
     def _on_click(self) -> None:
         self.boton.configure(state="disabled")
         self._write("Ejecutando (puede tardar unos segundos)...")
+        _run_in_background(self, self._compute, self._on_result)
 
-        def compute():
-            cases = run_experiment.load_cases()
-            kappa = run_experiment.intra_team_kappa(cases)
-            baseline = run_experiment.run_baseline(cases)
-            cells = [
-                run_experiment.run_cell(name, fmt, mode, cases)
-                for name, fmt, mode in run_experiment.CELLS
-            ]
-            return run_experiment.format_markdown(kappa, baseline, cells)
+    @staticmethod
+    def _compute() -> str:
+        """Lógica pura (sin Tkinter): el mismo camino que
+        `python -m experiments.run_experiment`, separado de `_on_click` para
+        poder probarlo directamente."""
+        cases = run_experiment.load_cases()
+        kappa = run_experiment.intra_team_kappa(cases)
+        baseline = run_experiment.run_baseline(cases)
+        cells = [
+            run_experiment.run_cell(name, fmt, mode, cases) for name, fmt, mode in run_experiment.CELLS
+        ]
+        return run_experiment.format_markdown(kappa, baseline, cells, n_total_cases=len(cases))
 
-        def done(result):
-            self.boton.configure(state="normal")
-            if isinstance(result, Exception):
-                self._write(f"Error: {result}")
-                return
-            self._write(result)
-
-        _run_in_background(self, compute, done)
+    def _on_result(self, result) -> None:
+        self.boton.configure(state="normal")
+        if isinstance(result, Exception):
+            self._write(f"Error: {result}")
+            return
+        self._write(result)
 
 
 class DatasetTab(ttk.Frame):
@@ -279,26 +289,29 @@ class DatasetTab(ttk.Frame):
     def _on_click(self) -> None:
         self.boton.configure(state="disabled")
         self._write("Cargando y analizando ~89.000 registros...")
+        _run_in_background(self, self._compute, self._on_result)
 
-        def compute():
-            if not EXTERNAL_DATA_PATH.exists():
-                raise FileNotFoundError(
-                    f"No se encontró {EXTERNAL_DATA_PATH}. Ver README.md, sección "
-                    "'Fuentes de datos reales'."
-                )
-            rows = load_rows()
-            distribution = level_distribution(rows)
-            durations = time_to_attention_minutes(rows)
-            return format_external_markdown(rows, distribution, durations)
+    @staticmethod
+    def _compute() -> str:
+        """Lógica pura (sin Tkinter): el mismo camino que
+        `python -m experiments.analyze_external_data`, separado de
+        `_on_click` para poder probarlo directamente."""
+        if not EXTERNAL_DATA_PATH.exists():
+            raise FileNotFoundError(
+                f"No se encontró {EXTERNAL_DATA_PATH}. Ver README.md, sección "
+                "'Fuentes de datos reales'."
+            )
+        rows = load_rows()
+        distribution = level_distribution(rows)
+        durations = time_to_attention_minutes(rows)
+        return format_external_markdown(rows, distribution, durations)
 
-        def done(result):
-            self.boton.configure(state="normal")
-            if isinstance(result, Exception):
-                self._write(f"Error: {result}")
-                return
-            self._write(result)
-
-        _run_in_background(self, compute, done)
+    def _on_result(self, result) -> None:
+        self.boton.configure(state="normal")
+        if isinstance(result, Exception):
+            self._write(f"Error: {result}")
+            return
+        self._write(result)
 
 
 def main() -> None:
