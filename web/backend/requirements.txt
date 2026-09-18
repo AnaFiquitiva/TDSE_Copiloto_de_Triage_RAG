@@ -1,0 +1,7 @@
+# Dependencias SOLO de esta API web opcional. El pipeline principal
+# (src/, experiments/, demo.py, gui.py) sigue sin dependencias externas de
+# terceros -- ver requirements.txt en la raiz del repo. Esta carpeta es una
+# capa de presentacion adicional que envuelve ese pipeline sin modificarlo.
+fastapi>=0.121
+uvicorn[standard]>=0.38
+httpx>=0.28

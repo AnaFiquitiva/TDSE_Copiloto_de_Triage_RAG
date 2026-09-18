@@ -140,12 +140,16 @@ servicios pagos, evaluado offline) y no a preferencia arbitraria:
   el formato de auditoría obligaría a tocar la lógica de decisión. Separar
   `audit.py` permite versionar el esquema de trazabilidad de forma
   independiente, como pide la Sección 4.3 del documento del proyecto.
-- **Sin capa de servicio/API.** El documento del proyecto acota
-  explícitamente el semestre a una evaluación offline por lotes (Tabla de
-  alcance): el despliegue como servicio, la multi-tenencia y la
-  interoperabilidad FHIR se declaran fuera de alcance. Añadir un servidor web
-  habría sido trabajo no evaluable dentro del diseño experimental 2x2 y una
-  dependencia externa (framework web) que el proyecto evita a propósito.
+- **Capa de servicio/API como interfaz opcional, no como arquitectura de
+  despliegue.** El documento del proyecto acota explícitamente el semestre a
+  una evaluación offline por lotes (Tabla de alcance): el despliegue como
+  servicio en producción, la multi-tenencia y la interoperabilidad FHIR
+  siguen fuera de alcance. `web/backend/` (FastAPI) existe únicamente como
+  una interfaz de presentación adicional para inspeccionar el pipeline
+  visualmente (ver "Interfaz web") — no implementa autenticación,
+  multi-tenencia, límites de tasa ni ninguna otra pieza de un despliegue
+  real, y el diseño experimental 2x2 se sigue evaluando por lotes con
+  `experiments/run_experiment.py`, no a través de esta API.
 
 ## Aviso importante
 
@@ -211,6 +215,58 @@ desde un hilo secundario.
 ```bash
 python gui.py
 ```
+
+## Interfaz web (React + TypeScript)
+
+Además de la interfaz de escritorio, el proyecto incluye una interfaz web más
+elaborada (`web/frontend/`, React 19 + TypeScript + Vite + Tailwind CSS v4 +
+Recharts) respaldada por una API REST (`web/backend/`, FastAPI). A diferencia
+del resto del pipeline, **esta capa sí tiene dependencias de terceros**,
+aisladas a propósito en sus propios `requirements.txt`/`package.json`: el
+pipeline principal (`src/`, `experiments/`, `demo.py`, `gui.py`) sigue
+funcionando exactamente igual, con o sin esta interfaz.
+
+La API no contiene lógica propia: cada endpoint llama a las mismas funciones
+que ya usan `demo.py`, `gui.py` y `experiments/*.py` (ver
+"¿Por qué esta arquitectura?" — el mismo principio de no duplicar el
+pipeline aplica aquí).
+
+### Cuatro vistas
+
+1. **Consulta individual** — igual que la pestaña homónima de `gui.py`, con
+   selector de corpus/embeddings/backend, tarjeta de confianza con barra de
+   progreso, y lista de fragmentos recuperados ordenados por score.
+2. **Experimento 2x2** — corre `run_experiment` vía la API y grafica S,
+   sensibilidad I-II y recall@k por celda (gráfico de barras), además de la
+   tabla completa.
+3. **Dataset real** — corre `analyze_external_data` vía la API: gráfico de
+   la distribución real de niveles, gráfico de tiempos de atención por
+   nivel, y tabla de distribución por red de IPS (con el resultado de la
+   prueba chi-cuadrado).
+4. **Corpus y casos** — explorador con buscador y filtros por nivel de las
+   74 viñetas del gold standard, y visor del corpus normativo (crudo y
+   reformateado), para inspeccionar exactamente qué evidencia respalda cada
+   sugerencia.
+
+### Cómo correrla
+
+```bash
+# Terminal 1: backend (API REST)
+pip install -r web/backend/requirements.txt
+uvicorn web.backend.app:app --reload --port 8000
+
+# Terminal 2: frontend (Vite dev server, con proxy a /api hacia el puerto 8000)
+cd web/frontend
+npm install
+npm run dev   # abre http://localhost:5173
+```
+
+`web/backend/tests/test_app.py` prueba los 6 endpoints con
+`fastapi.testclient.TestClient` (requiere las dependencias de
+`web/backend/requirements.txt`; no forma parte de la suite principal
+`tests/`, que sigue sin dependencias). El frontend se verificó manualmente
+end-to-end en navegador (las cuatro vistas, con datos reales) durante el
+desarrollo.
 
 ## Backend LLM opcional (Gemini)
 
@@ -343,6 +399,9 @@ tests/            Pruebas unitarias de cada módulo (incluye GUI y llamadas a Ge
 demo.py           CLI de una sola consulta, para inspección manual (soporta --backend)
 gui.py            Interfaz gráfica de escritorio (Tkinter), ver "Interfaz gráfica"
 .env.example      Plantilla para configurar GEMINI_API_KEY (nunca poner la key real aquí)
+web/
+  backend/        API REST (FastAPI) que envuelve src/ y experiments/, ver "Interfaz web"
+  frontend/       Interfaz web (React + TypeScript + Vite + Tailwind + Recharts)
 ```
 
 ## Fuentes de datos reales

@@ -8,3 +8,8 @@
 # dependencias. Si en el futuro se prefiere el SDK oficial (mas features,
 # mas mantenimiento upstream) o un modelo de embeddings local (p. ej.
 # sentence-transformers), agregar esa dependencia aqui.
+#
+# La interfaz web opcional (web/backend/, web/frontend/, ver README.md
+# "Interfaz web") SI tiene dependencias de terceros (FastAPI, React), pero
+# viven aisladas en sus propios requirements.txt/package.json y no afectan
+# a este archivo ni al pipeline principal.
