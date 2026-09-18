@@ -1,5 +1,5 @@
 {
-  "_nota": "Linea base de reglas (C0), congelada antes de ejecutar la evaluacion sobre las celdas E1-E4 (ver Seccion 5 del documento del proyecto). Se evalua en orden de prioridad de nivel I a V; gana la primera regla que encuentre al menos una palabra clave en el relato. Si ninguna regla coincide, se aplica el nivel por defecto documentado en 'default'.",
+  "_nota": "Linea base de reglas (C0), congelada antes de ejecutar la evaluacion sobre las celdas E1-E4 (ver Seccion 5 del documento del proyecto). Se evalua en orden de prioridad de nivel I a V; gana la primera regla que encuentre al menos una palabra clave en el relato. Si ninguna regla coincide, se aplica el nivel por defecto documentado en 'default'. ACTUALIZACION: al ampliar el corpus normativo con 7 motivos de consulta nuevos (dolor abdominal, convulsion, cefalea, quemadura, alergia, intoxicacion, gestante; ver corpus/reformatted/signos_alarma.md), esta linea base tenia cobertura cero para esos motivos y todos caian al nivel por defecto sin importar su gravedad real -- una desventaja injusta que no reflejaba una limitacion real del enfoque de reglas, sino que la linea base simplemente no habia sido extendida junto con el corpus. Se agregaron las palabras clave correspondientes UNA SOLA VEZ, derivadas de los criterios de la guia (no de los relatos exactos de data/cases.json), y se vuelven a congelar aqui antes de cualquier evaluacion posterior.",
   "priority_order": [1, 2, 3, 4, 5],
   "rules": {
     "1": {
@@ -14,7 +14,20 @@
         "hemorragia masiva",
         "no cede con presion",
         "en shock",
-        "esta en shock"
+        "esta en shock",
+        "abdomen en tabla",
+        "dura como una tabla",
+        "dolor a la descompresion",
+        "mas de cinco minutos convulsionando",
+        "sin recuperar el conocimiento entre",
+        "el peor dolor de cabeza de su vida",
+        "dolor de cabeza subito",
+        "quemadura extensa",
+        "se le cierra la garganta",
+        "labios muy hinchados",
+        "no debia y esta muy confundido",
+        "sangrando bastante por la vagina",
+        "sangrado vaginal abundante"
       ]
     },
     "2": {
@@ -50,7 +63,13 @@
         "diarrea con deshidratacion",
         "sospecha de fractura",
         "dolor moderado",
-        "dolor fuerte"
+        "dolor fuerte",
+        "ya paso la convulsion",
+        "convulsion breve",
+        "preferiria no estar vivo",
+        "no tiene ningun plan",
+        "tomo mas licor de lo normal",
+        "nauseas leves pero"
       ]
     },
     "4": {
@@ -62,7 +81,14 @@
         "sintomas de gripa",
         "gripa leve",
         "raspon",
-        "esguince leve"
+        "esguince leve",
+        "quemadura pequena",
+        "quemadura superficial",
+        "le salio urticaria",
+        "urticaria leve",
+        "dolor de cabeza leve",
+        "parecido al que le da siempre",
+        "dolor leve en la barriga"
       ]
     },
     "5": {
@@ -73,7 +99,9 @@
         "tramite administrativo",
         "control rutinario",
         "cita de control",
-        "renovar formula"
+        "renovar formula",
+        "control prenatal de rutina",
+        "control prenatal"
       ]
     }
   },

@@ -291,11 +291,11 @@ python -m experiments.compare_backends
 
 | Métrica | Determinista | Gemini |
 |---|---|---|
-| Cobertura (no abstención) | 0.48 | 0.91 |
-| S (sub-triage ponderado) | 0.125 | 0.000 |
-| Sensibilidad I-II | 0.303 | 0.879 |
-| Recall@k | 0.606 | 0.909 |
-| Tasa de abstención indebida | 0.515 | 0.091 |
+| Cobertura (no abstención) | 0.56 | 0.91 |
+| S (sub-triage ponderado) | 0.108 | 0.017 |
+| Sensibilidad I-II | 0.394 | 0.848 |
+| Recall@k | 0.667 | 0.894 |
+| Tasa de abstención indebida | 0.439 | 0.091 |
 
 Con 74 casos esto sigue siendo ilustrativo, no una conclusión estadística — pero
 la dirección del resultado es consistente con lo esperado: los embeddings
@@ -479,6 +479,23 @@ levemente si se edita `data/cases.json` o los umbrales de `src/generator.py`):
   pipeline. El backend Gemini opcional (ver "Backend LLM opcional") reduce
   esa abstención de forma sustancial sobre el mismo conjunto de 74 casos,
   a cambio de depender de una API externa.
+- **Nota de calibración, con honestidad metodológica:** al ampliar el corpus
+  (7 motivos nuevos) y el gold standard (74 casos), dos piezas quedaron
+  desactualizadas y se corrigieron una sola vez, antes de declarar estos
+  resultados finales: (1) el léxico de `clinical_es`
+  (`src/retrieval.py`) no tenía ninguna entrada para los motivos nuevos,
+  así que el modo no les daba ninguna ventaja sobre `generic`; extenderlo
+  mejoró la celda E4 en las tres métricas centrales (cobertura 0.48→0.56,
+  sensibilidad I-II 0.30→0.39, recall@k 0.61→0.67). (2) la línea base C0
+  (`data/keyword_rules.json`) tenía cobertura cero para esos mismos 7
+  motivos y todos caían al nivel por defecto sin importar su gravedad —
+  una desventaja injusta para la comparación, no una limitación real del
+  enfoque de reglas; extenderla simétricamente mejoró S (0.55→0.39) y la
+  sensibilidad I-II (0.30→0.46) de la línea base. También se probó, y se
+  **descartó**, agregar bigramas al motor TF-IDF: mejoraba recall@k y la
+  fidelidad de citación, pero empeoraba la sensibilidad I-II (la métrica de
+  seguridad más importante del proyecto), así que no se adoptó — ver el
+  comentario en `src/retrieval.py` para el detalle de esa decisión.
 
 ## Limitaciones (heredadas del documento del proyecto)
 

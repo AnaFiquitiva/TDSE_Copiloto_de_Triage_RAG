@@ -61,7 +61,35 @@ _CLINICAL_LEXICON: dict[str, str] = {
     "se pego en la cabeza": "trauma craneoencefalico",
     "le dieron temblores fuertes": "convulsion",
     "empezo a convulsionar": "convulsion",
+    "convulsionando sin parar": "convulsion activa",
+    "esta convulsionando": "convulsion activa",
+    "no ha recuperado el conocimiento entre los episodios": "no recupera el estado de conciencia estado epileptico",
+    "ya paso la convulsion": "convulsion ya cedio",
     "vomito en chorro": "vomito en proyectil",
+    # Agregados al ampliar el corpus con 7 motivos de consulta nuevos (ver
+    # corpus/reformatted/signos_alarma.md): sin estas entradas, el modo
+    # clinical_es no aportaba ninguna ventaja sobre 'generic' para estos
+    # motivos, porque el relato coloquial no comparte token literal con el
+    # texto de la guia.
+    "le duele mucho la barriga": "dolor abdominal",
+    "dolor en la barriga": "dolor abdominal",
+    "dolor en el estomago": "dolor abdominal",
+    "la barriga esta dura como una tabla": "abdomen en tabla rigidez generalizada",
+    "duele mucho cuando le presionan y sueltan": "dolor a la descompresion signo de rebote",
+    "dolor de cabeza": "cefalea",
+    "el peor dolor de cabeza de su vida": "cefalea subita la peor de la vida",
+    "cuello muy rigido": "rigidez de nuca",
+    "el cuello muy duro": "rigidez de nuca",
+    "dolor de cabeza parecido al que le da siempre": "cefalea habitual tipo tensional",
+    "se quemo": "quemadura",
+    "muy hinchados": "hinchazon",
+    "se le cierra la garganta": "hinchazon de garganta",
+    "no tiene la cara hinchada": "sin hinchazon facial",
+    "se tomo varias pastillas": "intoxicacion sustancia",
+    "tomo mas licor de lo normal": "intoxicacion sustancia de bajo riesgo",
+    "le cuesta mantenerse despierto": "alteracion del estado de conciencia",
+    "esta embarazada": "gestante embarazo",
+    "empezo a sangrar bastante por la vagina": "sangrado vaginal abundante durante el embarazo",
 }
 
 
@@ -79,6 +107,17 @@ def _normalize_lexicon(text: str) -> str:
 
 
 _TOKEN_RE = re.compile(r"[a-z_]+")
+
+# Nota de una prueba descartada: se evaluó agregar bigramas de palabras
+# adyacentes (p. ej. "dolor_toracico" además de "dolor" y "toracico") para
+# que frases cortas pesaran como unidad. Medido sobre las 74 viñetas de
+# data/cases.json, SÍ mejoró recall@k (0.606->0.667) y la fidelidad de
+# citación, pero EMPEORÓ la sensibilidad en niveles I-II (0.394->0.333,
+# celda E4) porque el vocabulario más denso diluye el margen de confianza
+# entre las ramas GRAVE/LEVE de un mismo motivo de consulta. Como la
+# sensibilidad en niveles I-II es la métrica de seguridad más importante del
+# proyecto (H2), se descartó el cambio y se documenta aquí para no
+# reintentarlo sin volver a medir el mismo trade-off.
 
 
 def tokenize(text: str, embedding_mode: str) -> list[str]:
